@@ -1,8 +1,12 @@
-import { adminSaveSettings } from "@/app/actions";
-import { getSettings } from "@/lib/db";
+import { adminApproveAdmin, adminRemoveAdmin, adminSaveSettings } from "@/app/actions";
+import { getSettings, listUsers } from "@/lib/db";
+import { adminLineIds } from "@/lib/line-auth";
+import { currentUser } from "@/lib/session";
 
 export default async function SettingsPage() {
-  const s = await getSettings();
+  const [s, admins, me] = await Promise.all([getSettings(), listUsers("admin"), currentUser()]);
+  const owners = adminLineIds();
+  const adminUrl = process.env.NODE_ENV === "production" ? "https://cleanner--cleannerproject.asia-southeast1.hosted.app/admin" : "/admin";
   return (
     <div className="max-w-2xl space-y-4">
       <h1 className="text-xl font-bold">ตั้งค่าร้าน</h1>
@@ -14,6 +18,41 @@ export default async function SettingsPage() {
         <label className="flex items-center gap-2 self-end pb-2 text-sm"><input type="checkbox" name="vatRegistered" defaultChecked={s.vatRegistered} /> จดทะเบียน VAT</label>
         <div className="sm:col-span-2"><button className="btn-primary">บันทึก</button></div>
       </form>
+      <section className="card space-y-3 text-sm">
+        <h2 className="font-semibold">ผู้ดูแลระบบ (แอดมิน)</h2>
+        <p className="text-slate-500">
+          เพิ่มแอดมิน: ส่งลิงก์ <code className="break-all">{adminUrl}</code> ให้คนนั้นเปิดแล้ว login ด้วย LINE คำขอจะขึ้นที่นี่ให้กดอนุมัติ
+        </p>
+        <ul className="divide-y divide-slate-100">
+          {admins.map((a) => {
+            const owner = !!a.lineUserId && owners.includes(a.lineUserId);
+            return (
+              <li key={a.id} className="flex flex-wrap items-center gap-3 py-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                {a.pictureUrl ? <img src={a.pictureUrl} alt="" className="h-8 w-8 rounded-full" /> : <span className="h-8 w-8 rounded-full bg-slate-200" />}
+                <span className="flex-1">
+                  <b>{a.name}</b>
+                  {a.id === me?.id && <span className="ml-1 text-xs text-slate-500">(คุณ)</span>}
+                  {owner && <span className="ml-1 rounded-full bg-slate-900 px-2 py-0.5 text-xs text-white">เจ้าของระบบ</span>}
+                  {a.pendingAdmin && <span className="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">รออนุมัติ</span>}
+                  {!a.lineUserId && <span className="ml-1 text-xs text-slate-400">(บัญชีทดลอง ไม่มี LINE)</span>}
+                </span>
+                {a.pendingAdmin && (
+                  <form action={adminApproveAdmin.bind(null, a.id)}>
+                    <button className="btn-primary py-1.5">อนุมัติ</button>
+                  </form>
+                )}
+                {!owner && a.id !== me?.id && (
+                  <form action={adminRemoveAdmin.bind(null, a.id)}>
+                    <button className="btn-danger py-1.5">{a.pendingAdmin ? "ปฏิเสธ" : "ถอนสิทธิ์"}</button>
+                  </form>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
       <div className="card text-sm text-slate-600">
         <h2 className="mb-2 font-semibold text-slate-800">การเชื่อมต่อ</h2>
         <ul className="list-inside list-disc space-y-1">

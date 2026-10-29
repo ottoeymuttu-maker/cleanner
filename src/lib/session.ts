@@ -50,7 +50,10 @@ export function loginPath(role: Role, next?: string) {
 
 export async function requireRole(role: Role) {
   const user = await currentUser();
-  const ok = user?.role === role && !(role === "staff" && (user.staff?.pendingApproval || !user.staff?.active));
+  const ok =
+    user?.role === role &&
+    !(role === "staff" && (user.staff?.pendingApproval || !user.staff?.active)) &&
+    !(role === "admin" && user.pendingAdmin);
   if (!ok) {
     if (demoLoginEnabled()) redirect("/?need=" + role);
     redirect(loginPath(role, (await headers()).get("x-pathname") ?? undefined));

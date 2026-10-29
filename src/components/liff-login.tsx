@@ -70,13 +70,11 @@ export function LiffLogin({ liffId, role, next }: { liffId: string; role: Role; 
       )}
       {state.kind === "not_admin" && (
         <>
-          <div className="text-4xl">🔒</div>
-          <h1 className="mt-3 font-semibold">บัญชี LINE นี้ยังไม่ได้เป็นแอดมิน</h1>
-          <p className="mt-2 text-sm text-slate-500">ส่งรหัสด้านล่างให้ผู้ดูแลระบบเพื่อเพิ่มสิทธิ์แอดมิน</p>
-          <code className="mt-3 block break-all rounded-xl bg-slate-100 p-3 text-sm">{state.lineUserId}</code>
-          <button className="btn-outline mt-3" onClick={() => navigator.clipboard?.writeText(state.lineUserId)}>
-            คัดลอกรหัส
-          </button>
+          <div className="text-4xl">🔑</div>
+          <h1 className="mt-3 font-semibold">ส่งคำขอสิทธิ์แอดมินแล้ว</h1>
+          <p className="mt-2 text-sm text-slate-500">รอแอดมินที่มีอยู่อนุมัติที่หน้า ตั้งค่า → ผู้ดูแลระบบ เมื่ออนุมัติแล้วจะมีข้อความแจ้งทาง LINE จากนั้นเปิดหน้านี้อีกครั้ง</p>
+          <p className="mt-4 text-xs text-slate-400">รหัส LINE ของคุณ</p>
+          <code className="mt-1 block break-all rounded-xl bg-slate-100 p-3 text-xs">{state.lineUserId}</code>
         </>
       )}
       {state.kind === "error" && (

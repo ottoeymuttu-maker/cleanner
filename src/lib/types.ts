@@ -39,6 +39,7 @@ export interface User {
   phone: string;
   lineUserId?: string;
   pictureUrl?: string;
+  pendingAdmin?: boolean; // ขอสิทธิ์แอดมิน รอแอดมินคนอื่นอนุมัติ
   address?: string;
   staff?: StaffProfile;
 }

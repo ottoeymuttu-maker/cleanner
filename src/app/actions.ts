@@ -510,12 +510,18 @@ export async function liffLogin(idToken: string, role: "customer" | "staff" | "a
   }
 
   if (role === "admin") {
-    if (!adminLineIds().includes(profile.userId)) return { ok: false, reason: "not_admin", lineUserId: profile.userId };
+    // เจ้าของระบบ (ADMIN_LINE_USER_IDS) เข้าได้เสมอ คนอื่นต้องให้แอดมินที่มีอยู่อนุมัติในหน้าตั้งค่า
+    const owner = adminLineIds().includes(profile.userId);
     let admin = await findUserByLine(profile.userId, "admin");
     if (!admin) {
-      admin = { id: newId("a"), role: "admin", name: profile.name, phone: "", lineUserId: profile.userId, pictureUrl: profile.picture };
+      admin = { id: newId("a"), role: "admin", name: profile.name, phone: "", lineUserId: profile.userId, pictureUrl: profile.picture, pendingAdmin: !owner };
+      await upsertUser(admin);
+      if (!owner) await notifyAdmins(`🔑 ${profile.name} ขอสิทธิ์แอดมิน อนุมัติได้ที่ ตั้งค่า → ผู้ดูแลระบบ`);
+    } else if (owner && admin.pendingAdmin) {
+      admin = { ...admin, pendingAdmin: false };
       await upsertUser(admin);
     }
+    if (admin.pendingAdmin) return { ok: false, reason: "not_admin", lineUserId: profile.userId };
     await startSession(admin.id);
     return { ok: true };
   }
@@ -574,5 +580,24 @@ export async function adminRejectStaff(pendingId: string) {
   await requireRole("admin");
   const pending = await getUser(pendingId);
   if (pending?.staff?.pendingApproval) await deleteUser(pending.id);
+  refresh();
+}
+
+export async function adminApproveAdmin(userId: string) {
+  await requireRole("admin");
+  const u = await getUser(userId);
+  if (u?.role !== "admin" || !u.pendingAdmin) return;
+  await upsertUser({ ...u, pendingAdmin: false });
+  await notify(u.id, "คุณได้รับสิทธิ์แอดมินแล้ว เปิดหน้าหลังบ้านได้เลย");
+  refresh();
+}
+
+/** ถอนสิทธิ์/ปฏิเสธคำขอแอดมิน — ถอนตัวเอง หรือเจ้าของระบบ (ADMIN_LINE_USER_IDS) ไม่ได้ */
+export async function adminRemoveAdmin(userId: string) {
+  const me = await requireRole("admin");
+  const u = await getUser(userId);
+  if (u?.role !== "admin" || u.id === me.id) return;
+  if (u.lineUserId && adminLineIds().includes(u.lineUserId)) throw new Error("ถอนสิทธิ์เจ้าของระบบไม่ได้");
+  await deleteUser(u.id);
   refresh();
 }

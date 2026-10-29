@@ -26,6 +26,9 @@ export default async function Dashboard() {
   const reviews = jobs.filter((j) => j.review);
   const avg = reviews.length ? reviews.reduce((s, j) => s + j.review!.rating, 0) / reviews.length : 0;
 
+  const pendingAdmins = users.filter((u) => u.role === "admin" && u.pendingAdmin);
+  const pendingStaff = users.filter((u) => u.staff?.pendingApproval);
+
   const kpis = [
     ["รายรับเดือนนี้ (ยืนยันแล้ว)", baht(revenue)],
     ["ยอดงานรอเก็บเงิน", baht(pipeline)],
@@ -36,6 +39,12 @@ export default async function Dashboard() {
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-bold">แดชบอร์ด</h1>
+      {(pendingAdmins.length > 0 || pendingStaff.length > 0) && (
+        <div className="flex flex-wrap gap-2 text-sm">
+          {pendingAdmins.length > 0 && <Link href="/admin/settings" className="rounded-xl bg-amber-100 px-3 py-2 text-amber-900">🔑 คำขอสิทธิ์แอดมิน {pendingAdmins.length} คน</Link>}
+          {pendingStaff.length > 0 && <Link href="/admin/staff" className="rounded-xl bg-amber-100 px-3 py-2 text-amber-900">👷 ช่างขอเข้าใช้งาน {pendingStaff.length} คน</Link>}
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {kpis.map(([label, value]) => (
           <div key={label} className="card">
