@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<!-- รูปพื้นหลังโปรไฟล์ LINE OA 1080x878 — LINE วางรูปโปรไฟล์วงกลมทับด้านล่างกลาง จึงเว้นพื้นที่ตรงนั้นไว้ -->
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;800;900&display=block" rel="stylesheet">
+<style>
+  * { margin: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 878px; overflow: hidden; }
+  body {
+    font-family: "Kanit", sans-serif; color: #111; position: relative;
+    background: #fff8ec;
+    background-image: radial-gradient(#e9dcc4 4px, transparent 4px);
+    background-size: 40px 40px;
+  }
+  .blob { position: absolute; border: 8px solid #111; border-radius: 999px; }
+  .b1 { width: 420px; height: 420px; background: #c9b6ff; left: -120px; top: -140px; }
+  .b2 { width: 360px; height: 360px; background: #ff8fc7; right: -110px; bottom: -120px; }
+  .b3 { width: 200px; height: 200px; background: #7dd3fc; right: -70px; top: 40px; }
+  .wordmark { position: absolute; left: 50%; top: 150px; transform: translateX(-50%); width: 780px; }
+  .tagline {
+    position: absolute; left: 0; right: 0; top: 400px; text-align: center;
+    font-size: 64px; font-weight: 900; letter-spacing: -1px;
+  }
+  .pills { position: absolute; left: 0; right: 0; top: 510px; display: flex; justify-content: center; gap: 18px; }
+  .pill {
+    background: #fff; border: 7px solid #111; border-radius: 999px; box-shadow: 7px 7px 0 #111;
+    font-size: 34px; font-weight: 800; padding: 6px 26px; white-space: nowrap;
+  }
+  .pill.lime { background: #c8f54a; }
+  .emoji { position: absolute; font-family: "Segoe UI Emoji", "Noto Color Emoji", sans-serif; line-height: 1; }
+  .e1 { left: 110px; top: 640px; font-size: 110px; transform: rotate(-14deg); }
+  .e2 { left: 290px; top: 690px; font-size: 90px; transform: rotate(12deg); }
+  .spark { position: absolute; width: 70px; }
+</style>
+</head>
+<body>
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <img class="wordmark" src="../../public/logo-wordmark.png" alt="Cleanner">
+  <div class="tagline">ล้างแอร์ · แม่บ้าน · จองผ่าน LINE</div>
+  <div class="pills">
+    <span class="pill lime">รู้ราคาทันที</span>
+    <span class="pill">ติดตามงานได้</span>
+    <span class="pill">จ่ายง่าย PromptPay</span>
+  </div>
+  <div class="emoji e1">❄️</div>
+  <div class="emoji e2">🧽</div>
+  <svg class="spark" style="left:60px;top:560px" viewBox="0 0 100 100"><path d="M50 0 C55 35 65 45 100 50 C65 55 55 65 50 100 C45 65 35 55 0 50 C35 45 45 35 50 0Z" fill="#c8f54a" stroke="#111" stroke-width="8"/></svg>
+  <svg class="spark" style="right:300px;top:640px;width:56px" viewBox="0 0 100 100"><path d="M50 0 C55 35 65 45 100 50 C65 55 55 65 50 100 C45 65 35 55 0 50 C35 45 45 35 50 0Z" fill="#fff" stroke="#111" stroke-width="9"/></svg>
+</body>
+</html>
