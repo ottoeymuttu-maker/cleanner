@@ -2,16 +2,12 @@
 // มีค่า Firebase ใน env → ใช้ Firestore, ไม่มี → ใช้ไฟล์ data/db.json บนเครื่อง
 // หน้าเว็บและ actions เรียกผ่านไฟล์นี้เท่านั้น จึงสลับ backend ได้โดยไม่ต้องแก้ส่วนอื่น
 
-import path from "path";
 import type { Backend } from "./backend";
 import { firestoreBackend } from "./firestore";
 import { jsonBackend } from "./json";
 
 const useFirestore = !!(process.env.FIREBASE_SERVICE_ACCOUNT_FILE || process.env.FIREBASE_PROJECT_ID);
 const backend: Backend = useFirestore ? firestoreBackend : jsonBackend;
-
-// TODO: ย้ายไป Firebase Storage ก่อนขึ้น production (โฮสต์ส่วนใหญ่ไม่มีดิสก์ถาวร)
-export const UPLOAD_DIR = path.join(process.cwd(), "data", "uploads");
 
 export const getSettings = () => backend.getSettings();
 export const listServices = async () =>

@@ -1,15 +1,14 @@
 "use server";
 
-import { promises as fs } from "fs";
-import path from "path";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   createJob, getJob, getSettings, getUser, listServices, listUsers, newId,
-  updateJob, updateSettings, upsertService, upsertUser, UPLOAD_DIR,
+  updateJob, updateSettings, upsertService, upsertUser,
 } from "@/lib/db";
 import { notify } from "@/lib/line";
+import { savePhoto } from "@/lib/photos";
 import { jobTotals } from "@/lib/pricing";
 import { SESSION_COOKIE, requireRole } from "@/lib/session";
 import { STATUS_LABEL } from "@/lib/status";
@@ -202,8 +201,7 @@ export async function staffUploadPhoto(jobId: string, formData: FormData) {
 
   const ext = (file.type.split("/")[1] || "jpg").replace(/[^a-z0-9]/g, "");
   const name = `${jobId}-${kind}-${Date.now()}.${ext}`;
-  await fs.mkdir(UPLOAD_DIR, { recursive: true });
-  await fs.writeFile(path.join(UPLOAD_DIR, name), Buffer.from(await file.arrayBuffer()));
+  await savePhoto(name, Buffer.from(await file.arrayBuffer()), file.type);
   await updateJob(jobId, (j) => {
     j.photos.push({ kind, file: name, at: now(), by: user.id });
   });

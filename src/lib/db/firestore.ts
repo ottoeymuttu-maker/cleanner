@@ -7,9 +7,8 @@
 //   users/{id}           ลูกค้า / พนักงาน / แอดมิน (staff profile ฝังใน field staff)
 //   jobs/{id}            timeline, photos, checkIns ฝังใน document เดียวกัน
 
-import path from "path";
-import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
+import { firebaseApp } from "../firebase";
 import type { Job, Service, Settings, User } from "../types";
 import type { Backend } from "./backend";
 import { seedData } from "./seed";
@@ -19,22 +18,7 @@ let seeded: Promise<void> | undefined;
 
 function firestore() {
   if (db) return db;
-  const keyFile = process.env.FIREBASE_SERVICE_ACCOUNT_FILE;
-  const app =
-    getApps()[0] ??
-    initializeApp({
-      credential: keyFile
-        ? // ตอนพัฒนา: ชี้ไปที่ไฟล์ service account JSON (อยู่ใน .secrets/ ซึ่งไม่ถูก commit)
-          cert(path.resolve(process.cwd(), keyFile))
-        : // บนโฮสต์: ใส่ค่าทีละตัวเป็น environment variables
-          cert({
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            // private key ใน .env เก็บ \n เป็นตัวอักษร ต้องแปลงกลับ
-            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-          }),
-    });
-  db = getFirestore(app);
+  db = getFirestore(firebaseApp());
   try {
     db.settings({ ignoreUndefinedProperties: true });
   } catch {
