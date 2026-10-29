@@ -22,7 +22,11 @@ export function LiffLogin({ liffId, role, next }: { liffId: string; role: Role; 
       // LINE ตรวจที่อยู่กลับหลัง login แบบตรงตัว จึงใช้ path ล้วน (ไม่มี ?query) และจำหน้าที่จะไปต่อไว้ในเบราว์เซอร์
       // role ผูกกับ path ของหน้า login เสมอ (/liff/login, /staff/login, /staff/admin-login)
       const key = `${STATE_KEY}:${role}`;
-      if (new URLSearchParams(location.search).has("next")) sessionStorage.setItem(key, next);
+      const params = new URLSearchParams(location.search);
+      if (params.has("next")) sessionStorage.setItem(key, next);
+      // ลิงก์ลึกแบบ liff.line.me/<id>/book → LINE เปิด Endpoint พร้อม ?liff.state=/book ให้ไปหน้านั้นหลัง login
+      const liffState = params.get("liff.state");
+      if (liffState?.startsWith("/")) sessionStorage.setItem(key, location.pathname.replace(/\/(admin-)?login$/, "") + liffState);
       const target = { role, next: sessionStorage.getItem(key) ?? next };
       const redirectUri = location.origin + location.pathname;
 

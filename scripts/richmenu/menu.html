@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<!-- Rich Menu 2500x1686: เรนเดอร์เป็น PNG ด้วย headless Chrome (ดู create.mjs) -->
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 2500px; height: 1686px; overflow: hidden; }
+  body {
+    font-family: "Leelawadee UI", "Noto Sans Thai", Tahoma, sans-serif;
+    background: #e9f7ef;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: 1000px 686px;
+    gap: 14px;
+    padding: 0;
+  }
+  .cell {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 34px; color: #fff; text-align: center;
+  }
+  .big { grid-column: span 2; }
+  .wide { grid-column: span 3; flex-direction: row; gap: 48px; }
+  .ac { background: linear-gradient(160deg, #0ea5e9, #0369a1); }
+  .cl { background: linear-gradient(160deg, #06c755, #048a3b); }
+  .jobs { background: linear-gradient(160deg, #f59e0b, #c2410c); }
+  .chat { background: #ffffff; color: #0f172a; }
+  .team { background: #0f172a; }
+  .icon { font-size: 260px; line-height: 1; font-family: "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+  .wide .icon { font-size: 190px; }
+  .title { font-size: 138px; font-weight: 700; letter-spacing: 1px; }
+  .sub { font-size: 64px; opacity: .9; margin-top: -16px; }
+  .wide .title { font-size: 118px; }
+  .wide .sub { font-size: 56px; margin-top: 8px; }
+  .chat .sub { color: #475569; }
+</style>
+</head>
+<body>
+  <div class="cell big ac"><div class="icon">❄️</div><div class="title">จองล้างแอร์</div><div class="sub">เริ่ม 600 บาท/เครื่อง</div></div>
+  <div class="cell big cl"><div class="icon">🧹</div><div class="title">จองแม่บ้าน</div><div class="sub">เริ่ม 250 บาท/ชม.</div></div>
+  <div class="cell big jobs"><div class="icon">📋</div><div class="title">งานของฉัน</div><div class="sub">ติดตาม · ชำระเงิน · รีวิว</div></div>
+  <div class="cell wide chat"><div class="icon">💬</div><div><div class="title">ติดต่อร้าน</div><div class="sub">สอบถาม / แจ้งปัญหา</div></div></div>
+  <div class="cell wide team"><div class="icon">👷</div><div><div class="title">สำหรับทีมงาน</div><div class="sub">ช่างแอร์ · แม่บ้าน</div></div></div>
+</body>
+</html>
