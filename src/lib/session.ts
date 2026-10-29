@@ -3,7 +3,7 @@
 // → map lineUserId เป็น User แล้วออก session cookie แบบ signed
 
 import { createHmac, timingSafeEqual } from "crypto";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getUser } from "./db";
 import type { Role } from "./types";
@@ -42,8 +42,18 @@ export async function currentUser() {
   return id ? getUser(id) : undefined;
 }
 
+/** หน้า login ของแต่ละ role (อยู่ใต้ Endpoint ของ LIFF แต่ละตัว) */
+export function loginPath(role: Role, next?: string) {
+  const base = role === "customer" ? "/liff/login" : role === "staff" ? "/staff/login" : "/staff/login?as=admin";
+  return next ? `${base}${base.includes("?") ? "&" : "?"}next=${encodeURIComponent(next)}` : base;
+}
+
 export async function requireRole(role: Role) {
   const user = await currentUser();
-  if (!user || user.role !== role) redirect("/?need=" + role);
-  return user;
+  const ok = user?.role === role && !(role === "staff" && (user.staff?.pendingApproval || !user.staff?.active));
+  if (!ok) {
+    if (demoLoginEnabled()) redirect("/?need=" + role);
+    redirect(loginPath(role, (await headers()).get("x-pathname") ?? undefined));
+  }
+  return user!;
 }

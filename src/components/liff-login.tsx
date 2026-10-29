@@ -1,0 +1,83 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { liffLogin } from "@/app/actions";
+
+type Role = "customer" | "staff" | "admin";
+type State =
+  | { kind: "loading" }
+  | { kind: "pending" }
+  | { kind: "not_admin"; lineUserId: string }
+  | { kind: "error"; message: string };
+
+const RETRY_KEY = "liff-relogin";
+
+/** เปิดจาก LINE จะ login อัตโนมัติ เปิดจากเบราว์เซอร์ทั่วไปจะพาไปหน้า login ของ LINE */
+export function LiffLogin({ liffId, role, next }: { liffId: string; role: Role; next: string }) {
+  const [state, setState] = useState<State>({ kind: "loading" });
+
+  useEffect(() => {
+    (async () => {
+      const { default: liff } = await import("@line/liff");
+      await liff.init({ liffId });
+      if (!liff.isLoggedIn()) {
+        liff.login({ redirectUri: location.href });
+        return;
+      }
+      const idToken = liff.getIDToken();
+      const result = idToken ? await liffLogin(idToken, role) : { ok: false as const, reason: "error" as const, message: "ไม่ได้รับ ID token" };
+      if (result.ok) {
+        sessionStorage.removeItem(RETRY_KEY);
+        location.replace(next);
+        return;
+      }
+      // token ที่เบราว์เซอร์จำไว้หมดอายุ: ออกแล้ว login ใหม่ 1 ครั้ง
+      if (result.reason === "error" && !sessionStorage.getItem(RETRY_KEY)) {
+        sessionStorage.setItem(RETRY_KEY, "1");
+        liff.logout();
+        liff.login({ redirectUri: location.href });
+        return;
+      }
+      if (result.reason === "pending") setState({ kind: "pending" });
+      else if (result.reason === "not_admin") setState({ kind: "not_admin", lineUserId: result.lineUserId ?? "" });
+      else setState({ kind: "error", message: result.message ?? "เข้าสู่ระบบไม่สำเร็จ" });
+    })().catch((e) => setState({ kind: "error", message: (e as Error).message }));
+  }, [liffId, role, next]);
+
+  return (
+    <div className="mx-auto max-w-sm px-6 py-16 text-center">
+      {state.kind === "loading" && (
+        <>
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-brand-100 border-t-brand-500" />
+          <p className="mt-4 text-sm text-slate-500">กำลังเข้าสู่ระบบด้วย LINE…</p>
+        </>
+      )}
+      {state.kind === "pending" && (
+        <>
+          <div className="text-4xl">⏳</div>
+          <h1 className="mt-3 font-semibold">ส่งคำขอเข้าใช้งานแล้ว</h1>
+          <p className="mt-2 text-sm text-slate-500">รอแอดมินอนุมัติ เมื่ออนุมัติแล้วจะมีข้อความแจ้งทาง LINE จากนั้นเปิดแอปนี้อีกครั้ง</p>
+        </>
+      )}
+      {state.kind === "not_admin" && (
+        <>
+          <div className="text-4xl">🔒</div>
+          <h1 className="mt-3 font-semibold">บัญชี LINE นี้ยังไม่ได้เป็นแอดมิน</h1>
+          <p className="mt-2 text-sm text-slate-500">ส่งรหัสด้านล่างให้ผู้ดูแลระบบเพื่อเพิ่มสิทธิ์แอดมิน</p>
+          <code className="mt-3 block break-all rounded-xl bg-slate-100 p-3 text-sm">{state.lineUserId}</code>
+          <button className="btn-outline mt-3" onClick={() => navigator.clipboard?.writeText(state.lineUserId)}>
+            คัดลอกรหัส
+          </button>
+        </>
+      )}
+      {state.kind === "error" && (
+        <>
+          <div className="text-4xl">⚠️</div>
+          <h1 className="mt-3 font-semibold">เข้าสู่ระบบไม่สำเร็จ</h1>
+          <p className="mt-2 break-words text-sm text-slate-500">{state.message}</p>
+          <button className="btn-primary mt-4" onClick={() => location.reload()}>ลองอีกครั้ง</button>
+        </>
+      )}
+    </div>
+  );
+}

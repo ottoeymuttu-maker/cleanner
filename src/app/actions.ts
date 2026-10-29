@@ -4,10 +4,11 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
-  createJob, createPayout, getJob, getPayout, getSettings, getUser, listJobs, listServices, listUsers, newId,
+  createJob, createPayout, deleteUser, findUserByLine, getJob, getPayout, getSettings, getUser, listJobs, listServices, listUsers, newId,
   updateJob, updatePayout, updateSettings, upsertService, upsertUser,
 } from "@/lib/db";
 import { notify } from "@/lib/line";
+import { adminLineIds, verifyIdToken } from "@/lib/line-auth";
 import { payoutTotals, unpaidLines } from "@/lib/payroll";
 import { savePhoto } from "@/lib/photos";
 import { jobTotals } from "@/lib/pricing";
@@ -48,12 +49,7 @@ export async function loginAs(formData: FormData) {
   if (!demoLoginEnabled()) throw new Error("ปิดการ login ทดลองบนเว็บจริง");
   const user = await getUser(str(formData, "userId"));
   if (!user) return;
-  (await cookies()).set(SESSION_COOKIE, sessionValue(user.id), {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-  });
+  await startSession(user.id);
   redirect(user.role === "customer" ? "/liff" : user.role === "staff" ? "/staff" : "/admin");
 }
 
@@ -99,7 +95,8 @@ export async function createBooking(formData: FormData) {
     checkIns: [],
   });
 
-  if (!user.address) await upsertUser({ ...user, address });
+  const phone = str(formData, "phone");
+  if (!user.address || (phone && phone !== user.phone)) await upsertUser({ ...user, address: user.address || address, phone: phone || user.phone });
   await notifyAdmins(`งานใหม่ ${job.code} จาก ${user.name}${needsSurvey ? " (รอประเมินราคา)" : ""}`);
   refresh();
   redirect(`/liff/jobs/${job.id}`);
@@ -487,4 +484,95 @@ export async function customerDecideAddOn(jobId: string, addOnId: string, accept
   for (const s of updated.staffIds) await notify(s, msg);
   await notifyAdmins(msg);
   refresh(jobId);
+}
+
+// ================= LINE Login (LIFF) =================
+
+type LoginResult = { ok: true } | { ok: false; reason: "pending" | "not_admin" | "error"; lineUserId?: string; message?: string };
+
+async function startSession(userId: string) {
+  (await cookies()).set(SESSION_COOKIE, sessionValue(userId), {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 30,
+  });
+}
+
+/** รับ ID token จาก LIFF → ตรวจกับ LINE → หา/สร้างผู้ใช้ตาม role → ออก session */
+export async function liffLogin(idToken: string, role: "customer" | "staff" | "admin"): Promise<LoginResult> {
+  let profile;
+  try {
+    profile = await verifyIdToken(idToken);
+  } catch (e) {
+    return { ok: false, reason: "error", message: (e as Error).message };
+  }
+
+  if (role === "admin") {
+    if (!adminLineIds().includes(profile.userId)) return { ok: false, reason: "not_admin", lineUserId: profile.userId };
+    let admin = await findUserByLine(profile.userId, "admin");
+    if (!admin) {
+      admin = { id: newId("a"), role: "admin", name: profile.name, phone: "", lineUserId: profile.userId, pictureUrl: profile.picture };
+      await upsertUser(admin);
+    }
+    await startSession(admin.id);
+    return { ok: true };
+  }
+
+  if (role === "staff") {
+    let staff = await findUserByLine(profile.userId, "staff");
+    if (!staff) {
+      // ครั้งแรก: สร้างคำขอรออนุมัติ แอดมินจะอนุมัติเป็นคนใหม่หรือผูกกับประวัติพนักงานเดิม
+      staff = {
+        id: newId("s"),
+        role: "staff",
+        name: profile.name,
+        phone: "",
+        lineUserId: profile.userId,
+        pictureUrl: profile.picture,
+        staff: { type: "employee", skills: [], zone: "", payModel: "hourly", rate: 0, joinedAt: now().slice(0, 10), active: false, pendingApproval: true },
+      };
+      await upsertUser(staff);
+      await notifyAdmins(`👷 ${profile.name} ขอเข้าใช้งานแอปทีมงาน กรุณาอนุมัติที่หน้าพนักงาน`);
+    }
+    await startSession(staff.id);
+    return staff.staff?.pendingApproval || !staff.staff?.active ? { ok: false, reason: "pending" } : { ok: true };
+  }
+
+  let customer = await findUserByLine(profile.userId, "customer");
+  if (!customer) {
+    customer = { id: newId("c"), role: "customer", name: profile.name, phone: "", lineUserId: profile.userId, pictureUrl: profile.picture };
+    await upsertUser(customer);
+  }
+  await startSession(customer.id);
+  return { ok: true };
+}
+
+/** แอดมินอนุมัติช่างที่ขอเข้าใช้งาน: เป็นคนใหม่ หรือผูก LINE เข้ากับประวัติพนักงานเดิม */
+export async function adminApproveStaff(pendingId: string, formData: FormData) {
+  await requireRole("admin");
+  const pending = await getUser(pendingId);
+  if (!pending?.staff?.pendingApproval) return;
+  const linkTo = str(formData, "linkTo");
+  if (linkTo) {
+    const existing = await getUser(linkTo);
+    if (!existing?.staff) throw new Error("ไม่พบพนักงาน");
+    await upsertUser({ ...existing, lineUserId: pending.lineUserId, pictureUrl: pending.pictureUrl });
+    await deleteUser(pending.id);
+    await notify(existing.id, "แอดมินอนุมัติแล้ว เปิดแอปทีมงานเพื่อดูงานได้เลย");
+    refresh();
+    redirect(`/admin/staff/${existing.id}`);
+  }
+  await upsertUser({ ...pending, staff: { ...pending.staff, pendingApproval: false, active: true } });
+  await notify(pending.id, "แอดมินอนุมัติแล้ว เปิดแอปทีมงานเพื่อดูงานได้เลย");
+  refresh();
+  redirect(`/admin/staff/${pending.id}`);
+}
+
+export async function adminRejectStaff(pendingId: string) {
+  await requireRole("admin");
+  const pending = await getUser(pendingId);
+  if (pending?.staff?.pendingApproval) await deleteUser(pending.id);
+  refresh();
 }

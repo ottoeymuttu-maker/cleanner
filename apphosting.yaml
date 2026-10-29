@@ -21,6 +21,13 @@ env:
     value: "2012274324"
   - variable: LINE_LOGIN_CHANNEL_ID
     value: "2012272536"
+  - variable: LIFF_ID_CUSTOMER
+    value: 2012272536-CAgJh36Y
+  - variable: LIFF_ID_STAFF
+    value: 2012272536-gLoLgOGU
+  # LINE userId ของแอดมิน คั่นด้วย , (ดูได้จากหน้า login แอดมินเมื่อบัญชียังไม่มีสิทธิ์)
+  # - variable: ADMIN_LINE_USER_IDS
+  #   value: Uxxxxxxxx
 
   # ---------- Secrets ----------
   - variable: SESSION_SECRET

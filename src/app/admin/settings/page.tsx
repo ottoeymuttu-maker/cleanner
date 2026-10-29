@@ -15,11 +15,11 @@ export default async function SettingsPage() {
         <div className="sm:col-span-2"><button className="btn-primary">บันทึก</button></div>
       </form>
       <div className="card text-sm text-slate-600">
-        <h2 className="mb-2 font-semibold text-slate-800">การเชื่อมต่อ (ยังไม่ได้ตั้งค่า)</h2>
+        <h2 className="mb-2 font-semibold text-slate-800">การเชื่อมต่อ</h2>
         <ul className="list-inside list-disc space-y-1">
           <li>LINE Messaging API — ใส่ <code>LINE_CHANNEL_ACCESS_TOKEN</code> ใน .env.local เพื่อส่งแจ้งเตือนจริง</li>
-          <li>LIFF — ใส่ <code>NEXT_PUBLIC_LIFF_ID_CUSTOMER</code> / <code>NEXT_PUBLIC_LIFF_ID_STAFF</code></li>
-          <li>Firebase / Firestore — ใส่ค่า config ของโปรเจกต์ Firebase</li>
+          <li>LIFF — <code>LIFF_ID_CUSTOMER</code> / <code>LIFF_ID_STAFF</code> · แอดมินกำหนดด้วย <code>ADMIN_LINE_USER_IDS</code> ใน apphosting.yaml</li>
+          <li>Firebase — Firestore + Storage (ตั้งค่าใน apphosting.yaml)</li>
         </ul>
       </div>
     </div>

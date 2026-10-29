@@ -106,6 +106,9 @@ export const firestoreBackend: Backend = {
   async upsertUser(user) {
     await (await ensureSeed()).doc(`users/${user.id}`).set(user);
   },
+  async deleteUser(id) {
+    await (await ensureSeed()).doc(`users/${id}`).delete();
+  },
   async updateSettings(patch) {
     await (await ensureSeed()).doc("config/settings").set(patch, { merge: true });
   },

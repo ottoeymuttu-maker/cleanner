@@ -2,6 +2,7 @@
 // มีค่า Firebase ใน env → ใช้ Firestore, ไม่มี → ใช้ไฟล์ data/db.json บนเครื่อง
 // หน้าเว็บและ actions เรียกผ่านไฟล์นี้เท่านั้น จึงสลับ backend ได้โดยไม่ต้องแก้ส่วนอื่น
 
+import type { User } from "../types";
 import type { Backend } from "./backend";
 import { firestoreBackend } from "./firestore";
 import { jsonBackend } from "./json";
@@ -21,6 +22,9 @@ export const createJob: Backend["createJob"] = (input) => backend.createJob(inpu
 export const updateJob: Backend["updateJob"] = (id, fn) => backend.updateJob(id, fn);
 export const upsertService: Backend["upsertService"] = (s) => backend.upsertService(s);
 export const upsertUser: Backend["upsertUser"] = (u) => backend.upsertUser(u);
+export const deleteUser: Backend["deleteUser"] = (id) => backend.deleteUser(id);
+export const findUserByLine = async (lineUserId: string, role: User["role"]) =>
+  (await backend.listUsers(role)).find((u) => u.lineUserId === lineUserId);
 export const updateSettings: Backend["updateSettings"] = (p) => backend.updateSettings(p);
 export const listPayouts = async () =>
   (await backend.listPayouts()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));

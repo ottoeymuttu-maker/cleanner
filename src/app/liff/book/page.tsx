@@ -18,6 +18,7 @@ export default async function BookPage(props: PageProps<"/liff/book">) {
         services={services.filter((s) => s.active)}
         travelFee={settings.travelFeeBase}
         defaultAddress={user.address ?? ""}
+        defaultPhone={user.phone}
       />
     </>
   );

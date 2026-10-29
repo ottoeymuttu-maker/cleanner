@@ -76,6 +76,11 @@ export const jsonBackend: Backend = {
       else db.users.push(user);
     }),
 
+  deleteUser: (id) =>
+    mutate((db) => {
+      db.users = db.users.filter((u) => u.id !== id);
+    }),
+
   updateSettings: (patch) =>
     mutate((db) => {
       db.settings = { ...db.settings, ...patch };

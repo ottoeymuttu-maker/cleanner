@@ -13,6 +13,7 @@ export interface Backend {
   updateJob(id: string, fn: (job: Job) => void): Promise<Job>;
   upsertService(service: Service): Promise<void>;
   upsertUser(user: User): Promise<void>;
+  deleteUser(id: string): Promise<void>;
   updateSettings(patch: Partial<Settings>): Promise<void>;
 
   listPayouts(): Promise<Payout[]>;

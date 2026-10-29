@@ -28,6 +28,7 @@ export interface StaffProfile {
   company?: string; // สำหรับ supplier
   joinedAt: string;
   active: boolean;
+  pendingApproval?: boolean; // ช่างที่เพิ่ง login ผ่าน LINE ครั้งแรก รอแอดมินอนุมัติ/ผูกกับประวัติเดิม
   notes?: string;
 }
 
@@ -37,6 +38,7 @@ export interface User {
   name: string;
   phone: string;
   lineUserId?: string;
+  pictureUrl?: string;
   address?: string;
   staff?: StaffProfile;
 }

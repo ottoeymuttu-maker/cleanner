@@ -18,6 +18,7 @@ export default function BookingForm(props: {
   services: Service[];
   travelFee: number;
   defaultAddress: string;
+  defaultPhone: string;
 }) {
   const list = props.services.filter((s) => s.category === props.category);
   const [qty, setQty] = useState<Record<string, number>>({});
@@ -78,6 +79,10 @@ export default function BookingForm(props: {
         <div>
           <label className="label">วันและเวลาที่สะดวก</label>
           <input type="datetime-local" name="scheduledAt" required defaultValue={defaultSlot()} className="input" />
+        </div>
+        <div>
+          <label className="label">เบอร์โทรติดต่อ</label>
+          <input name="phone" type="tel" required pattern="[0-9+\- ]{9,15}" defaultValue={props.defaultPhone} className="input" />
         </div>
         <div>
           <label className="label">ที่อยู่</label>

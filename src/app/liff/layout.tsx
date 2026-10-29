@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { requireRole } from "@/lib/session";
 
-export default async function LiffLayout({ children }: LayoutProps<"/liff">) {
-  await requireRole("customer");
+// ไม่ตรวจสิทธิ์ที่ layout เพราะหน้า /liff/login ต้องเปิดได้ก่อน login — ทุกหน้าเรียก requireRole เอง
+export default function LiffLayout({ children }: LayoutProps<"/liff">) {
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col bg-slate-50 shadow-xl">
       <div className="flex-1 pb-20">{children}</div>
