@@ -21,8 +21,10 @@
   }
   .big { grid-column: span 2; }
   .wide { grid-column: span 3; flex-direction: row; gap: 48px; }
-  .ac { background: linear-gradient(160deg, #0ea5e9, #0369a1); }
-  .cl { background: linear-gradient(160deg, #06c755, #048a3b); }
+  .book { grid-column: span 4; background: linear-gradient(135deg, #0ea5e9 0%, #06c755 100%); }
+  .book .title { font-size: 190px; }
+  .book .sub { font-size: 70px; }
+  .icons { display: flex; gap: 60px; }
   .jobs { background: linear-gradient(160deg, #f59e0b, #c2410c); }
   .chat { background: #ffffff; color: #0f172a; }
   .team { background: #0f172a; }
@@ -36,8 +38,11 @@
 </style>
 </head>
 <body>
-  <div class="cell big ac"><div class="icon">❄️</div><div class="title">จองล้างแอร์</div><div class="sub">เริ่ม 600 บาท/เครื่อง</div></div>
-  <div class="cell big cl"><div class="icon">🧹</div><div class="title">จองแม่บ้าน</div><div class="sub">เริ่ม 250 บาท/ชม.</div></div>
+  <div class="cell book">
+    <div class="icons"><span class="icon">❄️</span><span class="icon">🧹</span></div>
+    <div class="title">จองบริการ</div>
+    <div class="sub">ล้างแอร์ เริ่ม 600 บาท · แม่บ้าน เริ่ม 250 บาท/ชม.</div>
+  </div>
   <div class="cell big jobs"><div class="icon">📋</div><div class="title">งานของฉัน</div><div class="sub">ติดตาม · ชำระเงิน · รีวิว</div></div>
   <div class="cell wide chat"><div class="icon">💬</div><div><div class="title">ติดต่อร้าน</div><div class="sub">สอบถาม / แจ้งปัญหา</div></div></div>
   <div class="cell wide team"><div class="icon">👷</div><div><div class="title">สำหรับทีมงาน</div><div class="sub">ช่างแอร์ · แม่บ้าน</div></div></div>
