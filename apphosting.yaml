@@ -26,8 +26,8 @@ env:
   - variable: LIFF_ID_STAFF
     value: 2012272536-gLoLgOGU
   # LINE userId ของแอดมิน คั่นด้วย , (ดูได้จากหน้า login แอดมินเมื่อบัญชียังไม่มีสิทธิ์)
-  # - variable: ADMIN_LINE_USER_IDS
-  #   value: Uxxxxxxxx
+  - variable: ADMIN_LINE_USER_IDS
+    value: Uaf30b936b3e7b4ca949f96ba7c8244dc
 
   # ---------- Secrets ----------
   - variable: SESSION_SECRET

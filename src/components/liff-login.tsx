@@ -19,11 +19,11 @@ export function LiffLogin({ liffId, role, next }: { liffId: string; role: Role; 
 
   useEffect(() => {
     (async () => {
-      // LINE ตรวจที่อยู่กลับหลัง login แบบตรงตัว จึงใช้ path ล้วน (ไม่มี ?query) แล้วจำ role/next ไว้ในเบราว์เซอร์แทน
-      const saved = JSON.parse(sessionStorage.getItem(STATE_KEY) ?? "null") as { role: Role; next: string } | null;
-      const fromUrl = new URLSearchParams(location.search).has("as") || new URLSearchParams(location.search).has("next");
-      const target = fromUrl || !saved ? { role, next } : saved;
-      sessionStorage.setItem(STATE_KEY, JSON.stringify(target));
+      // LINE ตรวจที่อยู่กลับหลัง login แบบตรงตัว จึงใช้ path ล้วน (ไม่มี ?query) และจำหน้าที่จะไปต่อไว้ในเบราว์เซอร์
+      // role ผูกกับ path ของหน้า login เสมอ (/liff/login, /staff/login, /staff/admin-login)
+      const key = `${STATE_KEY}:${role}`;
+      if (new URLSearchParams(location.search).has("next")) sessionStorage.setItem(key, next);
+      const target = { role, next: sessionStorage.getItem(key) ?? next };
       const redirectUri = location.origin + location.pathname;
 
       const { default: liff } = await import("@line/liff");
@@ -36,7 +36,7 @@ export function LiffLogin({ liffId, role, next }: { liffId: string; role: Role; 
       const result = idToken ? await liffLogin(idToken, target.role) : { ok: false as const, reason: "error" as const, message: "ไม่ได้รับ ID token" };
       if (result.ok) {
         sessionStorage.removeItem(RETRY_KEY);
-        sessionStorage.removeItem(STATE_KEY);
+        sessionStorage.removeItem(key);
         location.replace(target.next);
         return;
       }

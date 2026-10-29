@@ -44,8 +44,8 @@ export async function currentUser() {
 
 /** หน้า login ของแต่ละ role (อยู่ใต้ Endpoint ของ LIFF แต่ละตัว) */
 export function loginPath(role: Role, next?: string) {
-  const base = role === "customer" ? "/liff/login" : role === "staff" ? "/staff/login" : "/staff/login?as=admin";
-  return next ? `${base}${base.includes("?") ? "&" : "?"}next=${encodeURIComponent(next)}` : base;
+  const base = role === "customer" ? "/liff/login" : role === "staff" ? "/staff/login" : "/staff/admin-login";
+  return next ? `${base}?next=${encodeURIComponent(next)}` : base;
 }
 
 export async function requireRole(role: Role) {
