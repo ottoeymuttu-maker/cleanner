@@ -191,10 +191,13 @@ export async function staffCheckIn(jobId: string, lat?: number, lng?: number) {
 }
 
 export async function staffUploadPhoto(jobId: string, formData: FormData) {
-  const { user } = await assignedJob(jobId);
+  const { user, job } = await assignedJob(jobId);
   const file = formData.get("photo");
   const kind = str(formData, "kind") === "after" ? "after" : "before";
   if (!(file instanceof File) || file.size === 0) return;
+  // ลำดับบังคับ: เช็คอิน → รูปก่อนทำ → รูปหลังทำ → ปิดงาน
+  if (job.status !== "in_progress") throw new Error("กรุณาเช็คอินหน้างานก่อนถ่ายรูป");
+  if (kind === "after" && !job.photos.some((p) => p.kind === "before")) throw new Error("กรุณาถ่ายรูปก่อนทำงานก่อน");
   if (!file.type.startsWith("image/") || file.size > 10 * 1024 * 1024) throw new Error("รองรับเฉพาะรูปภาพไม่เกิน 10MB");
 
   const ext = (file.type.split("/")[1] || "jpg").replace(/[^a-z0-9]/g, "");
@@ -210,6 +213,7 @@ export async function staffUploadPhoto(jobId: string, formData: FormData) {
 export async function staffComplete(jobId: string, lat?: number, lng?: number) {
   const { user, job } = await assignedJob(jobId);
   if (job.status !== "in_progress") return;
+  if (!job.photos.some((p) => p.kind === "before")) throw new Error("กรุณาถ่ายรูปก่อนทำงาน");
   if (!job.photos.some((p) => p.kind === "after")) throw new Error("กรุณาถ่ายรูปหลังทำงานก่อนปิดงาน");
   await updateJob(jobId, (j) => {
     for (const c of j.checkIns) {

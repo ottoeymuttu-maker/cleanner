@@ -14,7 +14,8 @@ const backend: Backend = useFirestore ? firestoreBackend : jsonBackend;
 export const UPLOAD_DIR = path.join(process.cwd(), "data", "uploads");
 
 export const getSettings = () => backend.getSettings();
-export const listServices = () => backend.listServices();
+export const listServices = async () =>
+  (await backend.listServices()).sort((a, b) => a.category.localeCompare(b.category) || a.price - b.price);
 export const listUsers = (role?: Parameters<Backend["listUsers"]>[0]) => backend.listUsers(role);
 export const getUser = (id: string) => backend.getUser(id);
 export const listJobs = async () =>

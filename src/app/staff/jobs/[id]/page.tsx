@@ -51,12 +51,17 @@ export default async function StaffJob(props: PageProps<"/staff/jobs/[id]">) {
             <GeoButton jobId={job.id} mode="checkin" label="📍 เช็คอินถึงหน้างาน" />
           )}
           {job.status === "in_progress" && (
-            <>
-              <PhotoForm jobId={job.id} kind="before" done={hasBefore} />
-              <PhotoForm jobId={job.id} kind="after" done={hasAfter} />
-              <GeoButton jobId={job.id} mode="complete" label="✅ ปิดงาน + เช็คเอาท์" disabled={!hasAfter} />
-              {!hasAfter && <p className="text-xs text-slate-500">* ต้องมีรูปหลังทำงานก่อนปิดงาน</p>}
-            </>
+            <ol className="space-y-3">
+              <Step n={1} title="ถ่ายรูปก่อนทำงาน" done={hasBefore}>
+                <PhotoForm jobId={job.id} kind="before" done={hasBefore} />
+              </Step>
+              <Step n={2} title="ถ่ายรูปหลังทำงาน" done={hasAfter} locked={!hasBefore}>
+                <PhotoForm jobId={job.id} kind="after" done={hasAfter} />
+              </Step>
+              <Step n={3} title="ปิดงาน" done={false} locked={!hasAfter}>
+                <GeoButton jobId={job.id} mode="complete" label="✅ ปิดงาน + เช็คเอาท์" />
+              </Step>
+            </ol>
           )}
           {["completed", "closed"].includes(job.status) && <p className="text-sm text-emerald-700">งานนี้ปิดแล้ว ขอบคุณครับ 🙏</p>}
         </section>
@@ -67,6 +72,18 @@ export default async function StaffJob(props: PageProps<"/staff/jobs/[id]">) {
         </section>
       </div>
     </>
+  );
+}
+
+function Step(props: { n: number; title: string; done: boolean; locked?: boolean; children: React.ReactNode }) {
+  return (
+    <li className={props.locked ? "opacity-40" : ""}>
+      <div className="mb-1 text-xs font-semibold text-slate-600">
+        {props.done ? "✅" : `${props.n}.`} {props.title}
+        {props.locked && " 🔒"}
+      </div>
+      {!props.locked && props.children}
+    </li>
   );
 }
 
