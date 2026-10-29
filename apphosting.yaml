@@ -1,0 +1,31 @@
+# Firebase App Hosting
+# ค่าที่เป็นความลับ (secret) เก็บใน Cloud Secret Manager ตั้งด้วยคำสั่ง:
+#   firebase apphosting:secrets:set <ชื่อ>
+# ห้ามใส่ค่า secret ตรง ๆ ในไฟล์นี้ เพราะไฟล์นี้ถูก commit ขึ้น GitHub
+
+runConfig:
+  minInstances: 0
+  maxInstances: 2
+
+env:
+  # ---------- Firebase (ใช้ service account ของ App Hosting เอง ไม่ต้องมี key) ----------
+  - variable: FIREBASE_PROJECT_ID
+    value: cleannerproject
+  - variable: FIREBASE_STORAGE_BUCKET
+    value: cleannerproject.firebasestorage.app
+
+  # ---------- LINE (ค่าสาธารณะ) ----------
+  - variable: LINE_OA_BASIC_ID
+    value: "@466axfit"
+  - variable: LINE_MESSAGING_CHANNEL_ID
+    value: "2012274324"
+  - variable: LINE_LOGIN_CHANNEL_ID
+    value: "2012272536"
+
+  # ---------- Secrets ----------
+  - variable: SESSION_SECRET
+    secret: SESSION_SECRET
+  - variable: LINE_CHANNEL_SECRET
+    secret: LINE_CHANNEL_SECRET
+  - variable: LINE_CHANNEL_ACCESS_TOKEN
+    secret: LINE_CHANNEL_ACCESS_TOKEN

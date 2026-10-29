@@ -1,6 +1,6 @@
 import { loginAs, logout } from "./actions";
 import { getSettings, listUsers } from "@/lib/db";
-import { currentUser } from "@/lib/session";
+import { currentUser, demoLoginEnabled } from "@/lib/session";
 
 const ROLE_INFO = {
   customer: { title: "ลูกค้า (LIFF บน LINE)", desc: "จองบริการ ใบเสนอราคา จ่ายเงิน ติดตามงาน รีวิว" },
@@ -10,7 +10,22 @@ const ROLE_INFO = {
 
 export default async function Home(props: PageProps<"/">) {
   const { need } = await props.searchParams;
-  const [users, settings, me] = await Promise.all([listUsers(), getSettings(), currentUser()]);
+  const [settings, me] = await Promise.all([getSettings(), currentUser()]);
+  if (!demoLoginEnabled()) {
+    const oa = process.env.LINE_OA_BASIC_ID;
+    return (
+      <main className="mx-auto max-w-md px-4 py-16 text-center">
+        <h1 className="text-2xl font-bold">{settings.shopName}</h1>
+        <p className="mt-2 text-sm text-slate-500">บริการล้างแอร์และแม่บ้าน — จองและติดตามงานผ่าน LINE</p>
+        {oa && (
+          <a href={`https://line.me/R/ti/p/${oa}`} className="btn-primary mt-6">
+            เพิ่มเพื่อน LINE {oa}
+          </a>
+        )}
+      </main>
+    );
+  }
+  const users = await listUsers();
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">

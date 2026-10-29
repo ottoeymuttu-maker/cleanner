@@ -11,7 +11,7 @@ import { notify } from "@/lib/line";
 import { payoutTotals, unpaidLines } from "@/lib/payroll";
 import { savePhoto } from "@/lib/photos";
 import { jobTotals } from "@/lib/pricing";
-import { SESSION_COOKIE, currentUser, requireRole } from "@/lib/session";
+import { SESSION_COOKIE, currentUser, demoLoginEnabled, requireRole, sessionValue } from "@/lib/session";
 import { STATUS_LABEL } from "@/lib/status";
 import type { Job, JobItem, JobStatus, PayModel, ServiceCategory, User } from "@/lib/types";
 
@@ -45,9 +45,15 @@ function refresh(jobId?: string) {
 // ================= Session (mock LINE Login) =================
 
 export async function loginAs(formData: FormData) {
+  if (!demoLoginEnabled()) throw new Error("ปิดการ login ทดลองบนเว็บจริง");
   const user = await getUser(str(formData, "userId"));
   if (!user) return;
-  (await cookies()).set(SESSION_COOKIE, user.id, { httpOnly: true, sameSite: "lax", path: "/" });
+  (await cookies()).set(SESSION_COOKIE, sessionValue(user.id), {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  });
   redirect(user.role === "customer" ? "/liff" : user.role === "staff" ? "/staff" : "/admin");
 }
 
