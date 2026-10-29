@@ -86,6 +86,9 @@ export function LiffLogin({ liffId, role, next }: { liffId: string; role: Role; 
           <div className="text-4xl">⚠️</div>
           <h1 className="mt-3 font-semibold">เข้าสู่ระบบไม่สำเร็จ</h1>
           <p className="mt-2 break-words text-sm text-slate-500">{state.message}</p>
+          <p className="mt-3 break-all text-xs text-slate-400">
+            LIFF {liffId} · {role} · {typeof location !== "undefined" ? location.pathname + location.search : ""}
+          </p>
           <button className="btn-primary mt-4" onClick={() => location.reload()}>ลองอีกครั้ง</button>
         </>
       )}
