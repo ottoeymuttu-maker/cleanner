@@ -12,7 +12,7 @@ export function seedData(): DbShape {
   return {
     seq: 3,
     settings: {
-      shopName: "Clean & Cool",
+      shopName: "Cleanner",
       promptpayId: "0812345678",
       travelFeeBase: 100,
       quoteValidDays: 7,

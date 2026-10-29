@@ -9,7 +9,7 @@ const kanit = Kanit({
 });
 
 export const metadata: Metadata = {
-  title: "Clean & Cool — ล้างแอร์ & แม่บ้าน",
+  title: "Cleanner — ล้างแอร์ & แม่บ้าน",
   description: "จองบริการล้างแอร์และทำความสะอาดบ้านผ่าน LINE",
 };
 
