@@ -2,7 +2,7 @@ import Link from "next/link";
 import { listJobs, listUsers } from "@/lib/db";
 import { hoursFor } from "@/lib/timesheet";
 
-const PAY_LABEL = { hourly: "บาท/ชม.", per_job: "บาท/งาน", commission: "% ของยอด" } as const;
+const PAY_LABEL = { hourly: "บาท/ชม.", per_job: "บาท/งาน", commission: "% ของยอด", per_service: "" } as const;
 
 export default async function StaffList() {
   const [staff, jobs] = await Promise.all([listUsers("staff"), listJobs()]);
@@ -43,7 +43,7 @@ export default async function StaffList() {
                   <td className="td">{p.type === "employee" ? "พนักงาน" : `Supplier${p.company ? ` · ${p.company}` : ""}`}</td>
                   <td className="td">{p.skills.map((k) => (k === "aircon" ? "❄️ แอร์" : "🧹 แม่บ้าน")).join(" ")}</td>
                   <td className="td">{p.zone}</td>
-                  <td className="td">{p.rate} {PAY_LABEL[p.payModel]}</td>
+                  <td className="td">{p.payModel === "per_service" ? "ตามรายการบริการ" : `${p.rate} ${PAY_LABEL[p.payModel]}`}</td>
                   <td className="td text-right">{done.length}</td>
                   <td className="td text-right">{hoursFor(jobs, s.id, monthStart, new Date()).toFixed(1)}</td>
                   <td className="td text-right">{avg ? `${avg.toFixed(1)} ★` : "-"}</td>

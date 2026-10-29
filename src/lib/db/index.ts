@@ -22,6 +22,11 @@ export const updateJob: Backend["updateJob"] = (id, fn) => backend.updateJob(id,
 export const upsertService: Backend["upsertService"] = (s) => backend.upsertService(s);
 export const upsertUser: Backend["upsertUser"] = (u) => backend.upsertUser(u);
 export const updateSettings: Backend["updateSettings"] = (p) => backend.updateSettings(p);
+export const listPayouts = async () =>
+  (await backend.listPayouts()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+export const getPayout = (id: string) => backend.getPayout(id);
+export const createPayout: Backend["createPayout"] = (input) => backend.createPayout(input);
+export const updatePayout: Backend["updatePayout"] = (id, patch) => backend.updatePayout(id, patch);
 
 export function newId(prefix: string) {
   return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);

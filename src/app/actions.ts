@@ -4,15 +4,16 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
-  createJob, getJob, getSettings, getUser, listServices, listUsers, newId,
-  updateJob, updateSettings, upsertService, upsertUser,
+  createJob, createPayout, getJob, getPayout, getSettings, getUser, listJobs, listServices, listUsers, newId,
+  updateJob, updatePayout, updateSettings, upsertService, upsertUser,
 } from "@/lib/db";
 import { notify } from "@/lib/line";
+import { payoutTotals, unpaidLines } from "@/lib/payroll";
 import { savePhoto } from "@/lib/photos";
 import { jobTotals } from "@/lib/pricing";
-import { SESSION_COOKIE, requireRole } from "@/lib/session";
+import { SESSION_COOKIE, currentUser, requireRole } from "@/lib/session";
 import { STATUS_LABEL } from "@/lib/status";
-import type { Job, JobItem, JobStatus, ServiceCategory, User } from "@/lib/types";
+import type { Job, JobItem, JobStatus, PayModel, ServiceCategory, User } from "@/lib/types";
 
 const now = () => new Date().toISOString();
 const str = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
@@ -27,7 +28,7 @@ function setStatus(job: Job, status: JobStatus, by: string, note?: string) {
 
 /** ปิดงานอัตโนมัติเมื่อ ช่างทำเสร็จ + ลูกค้ายืนยัน + ชำระเงินตรวจสอบแล้ว */
 function maybeClose(job: Job, by: string) {
-  if (job.status === "completed" && job.customerAcceptedAt && job.payment?.verified) {
+  if (job.status === "completed" && job.customerAcceptedAt && job.payment?.verified && job.payment.amount >= jobTotals(job).total) {
     setStatus(job, "closed", by);
   }
 }
@@ -129,9 +130,10 @@ export async function cancelByCustomer(jobId: string) {
 
 export async function reportPayment(jobId: string, formData: FormData) {
   const { user, job } = await ownJob(jobId);
-  if (job.payment) return;
   const { total } = jobTotals(job);
+  if ((job.payment?.amount ?? 0) >= total) return;
   await updateJob(jobId, (j) => {
+    // ชำระครั้งแรก หรือชำระส่วนต่างหลังมีงานเพิ่ม
     j.payment = { method: "promptpay", amount: total, paidAt: now(), verified: false };
     j.timeline.push({ status: "note", at: now(), by: user.id, note: "ลูกค้าแจ้งชำระเงินผ่าน PromptPay" + (str(formData, "ref") ? ` (อ้างอิง ${str(formData, "ref")})` : "") });
   });
@@ -211,6 +213,8 @@ export async function staffUploadPhoto(jobId: string, formData: FormData) {
 export async function staffComplete(jobId: string, lat?: number, lng?: number) {
   const { user, job } = await assignedJob(jobId);
   if (job.status !== "in_progress") return;
+  if (job.addOns?.some((a) => ["requested", "quoted"].includes(a.status)))
+    throw new Error("มีคำของานเพิ่มที่รอแอดมิน/ลูกค้ายืนยัน ปิดงานไม่ได้");
   if (!job.photos.some((p) => p.kind === "before")) throw new Error("กรุณาถ่ายรูปก่อนทำงาน");
   if (!job.photos.some((p) => p.kind === "after")) throw new Error("กรุณาถ่ายรูปหลังทำงานก่อนปิดงาน");
   await updateJob(jobId, (j) => {
@@ -295,6 +299,7 @@ export async function adminSaveService(formData: FormData) {
     unit: str(formData, "unit") as "เครื่อง" | "ชั่วโมง" | "ครั้ง",
     price: num(formData, "price"),
     durationMin: num(formData, "durationMin"),
+    staffPay: num(formData, "staffPay"),
     active: formData.get("active") === "on",
   });
   refresh();
@@ -315,8 +320,16 @@ export async function adminSaveStaff(formData: FormData) {
       company: str(formData, "company"),
       skills: formData.getAll("skills").map(String) as ServiceCategory[],
       zone: str(formData, "zone"),
-      payModel: str(formData, "payModel") as "hourly" | "per_job" | "commission",
+      payModel: str(formData, "payModel") as PayModel,
       rate: num(formData, "rate"),
+      serviceRates: Object.fromEntries(
+        [...formData.entries()]
+          .filter(([k, v]) => k.startsWith("rate_") && String(v).trim() !== "")
+          .map(([k, v]) => [k.slice(5), Number(v)]),
+      ),
+      withholdingTax: formData.get("withholdingTax") === "on",
+      bankName: str(formData, "bankName"),
+      bankAccount: str(formData, "bankAccount"),
       idCardNo: str(formData, "idCardNo"),
       joinedAt: str(formData, "joinedAt") || now().slice(0, 10),
       active: formData.get("active") === "on",
@@ -338,4 +351,134 @@ export async function adminSaveSettings(formData: FormData) {
     vatRegistered: formData.get("vatRegistered") === "on",
   });
   refresh();
+}
+
+// ================= จ่ายค่าแรงช่าง / แม่บ้าน / Supplier =================
+
+export async function adminCreatePayout(staffId: string, formData: FormData) {
+  const admin = await requireRole("admin");
+  const [staff, jobs, services] = await Promise.all([getUser(staffId), listJobs(), listServices()]);
+  if (!staff?.staff) throw new Error("ไม่พบพนักงาน");
+  const picked = new Set(formData.getAll("jobIds").map(String));
+  const lines = unpaidLines(staff, jobs, services).filter((l) => picked.has(l.jobId));
+  if (!lines.length) throw new Error("กรุณาเลือกงานอย่างน้อย 1 งาน");
+
+  const labels = formData.getAll("adjLabel").map(String);
+  const amounts = formData.getAll("adjAmount").map(Number);
+  const adjustments = labels
+    .map((label, i) => ({ label: label.trim(), amount: amounts[i] || 0 }))
+    .filter((a) => a.label && a.amount);
+  const withholding = formData.get("withholdingTax") === "on";
+  const { wht, net } = payoutTotals(lines, adjustments, withholding);
+
+  const payout = await createPayout({
+    staffId,
+    createdAt: now(),
+    createdBy: admin.id,
+    lines,
+    adjustments,
+    withholdingTax: wht,
+    total: net,
+    status: "pending",
+    note: str(formData, "note"),
+  });
+  refresh();
+  redirect(`/admin/payouts/${payout.id}`);
+}
+
+export async function adminMarkPayoutPaid(payoutId: string, formData: FormData) {
+  await requireRole("admin");
+  const payout = await updatePayout(payoutId, { status: "paid", paidAt: now(), paidRef: str(formData, "paidRef") });
+  await notify(payout.staffId, `โอนค่าแรง ${payout.code} จำนวน ${payout.total.toLocaleString()} บาท เรียบร้อยแล้ว`);
+  refresh();
+}
+
+export async function adminVoidPayout(payoutId: string) {
+  await requireRole("admin");
+  const payout = await getPayout(payoutId);
+  if (payout?.status === "paid") throw new Error("รายการที่โอนแล้วยกเลิกไม่ได้");
+  await updatePayout(payoutId, { status: "void" });
+  refresh();
+}
+
+// ================= งานเพิ่ม / ขยายเวลาหน้างาน =================
+
+const ADDON_OPEN = ["requested", "quoted"];
+
+/** ทีมหน้างานหรือลูกค้าแจ้งขอเพิ่มงาน/เวลา — ยังไม่คิดเงินจนกว่าแอดมินตีราคาและลูกค้ายืนยัน */
+export async function requestAddOn(jobId: string, formData: FormData) {
+  const user = await currentUser();
+  const job = await getJob(jobId);
+  if (!user || !job) throw new Error("ไม่พบงาน");
+  const allowed =
+    (user.role === "staff" && job.staffIds.includes(user.id)) || (user.role === "customer" && job.customerId === user.id);
+  if (!allowed || !["assigned", "on_the_way", "in_progress"].includes(job.status)) throw new Error("ขอเพิ่มงานไม่ได้ในสถานะนี้");
+
+  const services = await listServices();
+  const svc = services.find((s) => s.id === str(formData, "serviceId"));
+  const qty = num(formData, "qty");
+  const items: JobItem[] = svc && qty > 0 ? [{ serviceId: svc.id, name: svc.name, qty, unitPrice: svc.price }] : [];
+  const reason = str(formData, "reason");
+  if (!items.length && !reason) throw new Error("กรุณาเลือกบริการหรือระบุรายละเอียด");
+
+  await updateJob(jobId, (j) => {
+    (j.addOns ??= []).push({ id: newId("ao"), reason, items, status: "requested", requestedBy: user.id, requestedAt: now() });
+    j.timeline.push({ status: "note", at: now(), by: user.id, note: `ขอเพิ่มงาน: ${items.map((i) => `${i.name} ×${i.qty}`).join(", ") || reason}` });
+  });
+  await notifyAdmins(`⏱️ ${job.code} ${user.name} ขอเพิ่มงาน/เวลา กรุณาตีราคาและส่งให้ลูกค้ายืนยัน`);
+  refresh(jobId);
+}
+
+/** แอดมินตีราคางานเพิ่ม (addOnId = "new" คือแอดมินสร้างเองจากการโทรแจ้ง) แล้วส่งให้ลูกค้ายืนยัน */
+export async function adminQuoteAddOn(jobId: string, addOnId: string, formData: FormData) {
+  const admin = await requireRole("admin");
+  const names = formData.getAll("itemName").map(String);
+  const qtys = formData.getAll("itemQty").map(Number);
+  const prices = formData.getAll("itemPrice").map(Number);
+  const serviceIds = formData.getAll("itemServiceId").map(String);
+  const items: JobItem[] = names
+    .map((name, i) => ({ serviceId: serviceIds[i] || null, name: name.trim(), qty: qtys[i] || 0, unitPrice: prices[i] || 0 }))
+    .filter((i) => i.name && i.qty > 0);
+  if (!items.length) throw new Error("กรุณาระบุรายการ");
+
+  const job = await updateJob(jobId, (j) => {
+    j.addOns ??= [];
+    let ao = j.addOns.find((a) => a.id === addOnId);
+    if (!ao) {
+      ao = { id: newId("ao"), reason: str(formData, "reason"), items: [], status: "requested", requestedBy: admin.id, requestedAt: now() };
+      j.addOns.push(ao);
+    }
+    if (!ADDON_OPEN.includes(ao.status)) throw new Error("รายการนี้ปิดไปแล้ว");
+    Object.assign(ao, { items, status: "quoted", quotedAt: now() });
+    j.timeline.push({ status: "note", at: now(), by: admin.id, note: "ส่งใบเสนอราคางานเพิ่มให้ลูกค้า" });
+  });
+  const total = items.reduce((s, i) => s + i.qty * i.unitPrice, 0);
+  await notify(job.customerId, `${job.code}: ใบเสนอราคางานเพิ่ม ${total.toLocaleString()} บาท กรุณากดยืนยันในเมนูงานของฉัน`);
+  refresh(jobId);
+}
+
+export async function adminRejectAddOn(jobId: string, addOnId: string) {
+  const admin = await requireRole("admin");
+  await updateJob(jobId, (j) => {
+    const ao = j.addOns?.find((a) => a.id === addOnId);
+    if (ao && ADDON_OPEN.includes(ao.status)) Object.assign(ao, { status: "rejected", decidedAt: now() });
+    j.timeline.push({ status: "note", at: now(), by: admin.id, note: "แอดมินปฏิเสธคำขอเพิ่มงาน" });
+  });
+  refresh(jobId);
+}
+
+/** ลูกค้ายืนยัน/ปฏิเสธงานเพิ่ม — ยืนยันแล้วรายการจะรวมเข้าใบงาน (คิดเงินลูกค้าและค่าแรงทีม) */
+export async function customerDecideAddOn(jobId: string, addOnId: string, accept: boolean) {
+  const { user, job } = await ownJob(jobId);
+  const updated = await updateJob(jobId, (j) => {
+    const ao = j.addOns?.find((a) => a.id === addOnId);
+    if (!ao || ao.status !== "quoted") throw new Error("ไม่มีใบเสนอราคาที่รอยืนยัน");
+    Object.assign(ao, { status: accept ? "accepted" : "rejected", decidedAt: now() });
+    if (accept) j.items.push(...ao.items.map((i) => ({ ...i, name: `${i.name} (เพิ่มหน้างาน)` })));
+    j.timeline.push({ status: "note", at: now(), by: user.id, note: accept ? "ลูกค้ายืนยันงานเพิ่ม" : "ลูกค้าไม่รับงานเพิ่ม" });
+  });
+  const msg = `${job.code}: ลูกค้า${accept ? "ยืนยัน" : "ไม่รับ"}งานเพิ่ม${accept ? " ทำต่อได้เลย" : ""}`;
+  for (const s of updated.staffIds) await notify(s, msg);
+  await notifyAdmins(msg);
+  refresh(jobId);
 }

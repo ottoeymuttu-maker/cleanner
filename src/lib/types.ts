@@ -8,15 +8,22 @@ export interface Service {
   unit: "เครื่อง" | "ชั่วโมง" | "ครั้ง";
   price: number;
   durationMin: number; // ต่อ 1 หน่วย ใช้ประมาณเวลางาน
+  staffPay?: number; // ค่าจ้างมาตรฐานที่จ่ายช่าง/แม่บ้าน ต่อ 1 หน่วย (ใช้กับ payModel "per_service")
   active: boolean;
 }
+
+export type PayModel = "hourly" | "per_job" | "commission" | "per_service";
 
 export interface StaffProfile {
   type: "employee" | "supplier";
   skills: ServiceCategory[];
   zone: string;
-  payModel: "hourly" | "per_job" | "commission";
-  rate: number; // บาท/ชม., บาท/งาน หรือ % ตาม payModel
+  payModel: PayModel;
+  rate: number; // บาท/ชม., บาท/งาน หรือ % ตาม payModel (per_service ไม่ใช้)
+  serviceRates?: Record<string, number>; // ราคาเฉพาะคนนี้ ต่อหน่วยบริการ (ทับ Service.staffPay)
+  withholdingTax?: boolean; // หัก ณ ที่จ่าย 3% (บุคคลภายนอก)
+  bankName?: string;
+  bankAccount?: string;
   idCardNo?: string;
   company?: string; // สำหรับ supplier
   joinedAt: string;
@@ -50,6 +57,18 @@ export interface JobItem {
   name: string;
   qty: number;
   unitPrice: number;
+}
+
+/** งานเพิ่ม/ขยายเวลาหน้างาน: ทีมหรือลูกค้าขอ → แอดมินตีราคา → ลูกค้ายืนยัน → ทีมทำต่อ */
+export interface AddOn {
+  id: string;
+  reason: string;
+  items: JobItem[];
+  status: "requested" | "quoted" | "accepted" | "rejected";
+  requestedBy: string;
+  requestedAt: string;
+  quotedAt?: string;
+  decidedAt?: string;
 }
 
 export interface TimelineEntry {
@@ -96,9 +115,35 @@ export interface Job {
   timeline: TimelineEntry[];
   photos: Photo[];
   checkIns: CheckIn[];
+  addOns?: AddOn[];
   customerAcceptedAt?: string;
+  payouts?: Record<string, string>; // staffId → payoutId ที่จ่ายค่าแรงงานนี้แล้ว
   review?: { rating: number; comment: string; at: string };
   createdAt: string;
+}
+
+export interface PayoutLine {
+  jobId: string;
+  code: string;
+  date: string;
+  detail: string;
+  amount: number;
+}
+
+export interface Payout {
+  id: string;
+  code: string; // PAY-xxxx
+  staffId: string;
+  createdAt: string;
+  createdBy: string;
+  lines: PayoutLine[];
+  adjustments: { label: string; amount: number }[]; // บวก = เพิ่ม, ลบ = หัก
+  withholdingTax: number;
+  total: number; // ยอดโอนสุทธิ
+  status: "pending" | "paid" | "void";
+  paidAt?: string;
+  paidRef?: string;
+  note?: string;
 }
 
 export interface Settings {
@@ -114,5 +159,7 @@ export interface DbShape {
   services: Service[];
   users: User[];
   jobs: Job[];
+  payouts?: Payout[];
   seq: number;
+  payoutSeq?: number;
 }

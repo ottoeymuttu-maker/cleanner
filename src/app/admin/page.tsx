@@ -13,8 +13,9 @@ export default async function Dashboard() {
   const month = today.slice(0, 7);
 
   const todayJobs = jobs.filter((j) => bkkDay(j.scheduledAt) === today && j.status !== "cancelled");
+  const addOnPending = (j: (typeof jobs)[number]) => (j.addOns ?? []).some((a) => a.status === "requested");
   const needAction = jobs.filter(
-    (j) => j.status === "requested" || j.status === "confirmed" || (j.payment && !j.payment.verified),
+    (j) => j.status === "requested" || j.status === "confirmed" || (j.payment && !j.payment.verified) || addOnPending(j),
   );
   const revenue = jobs
     .filter((j) => j.payment?.verified && bkkDay(j.payment.paidAt).startsWith(month))
@@ -55,7 +56,7 @@ export default async function Dashboard() {
                   <span>
                     <b>{j.code}</b> · {name(j.customerId)}
                     <span className="ml-2 text-xs text-slate-500">
-                      {j.status === "requested" ? "ต้องตีราคา" : j.status === "confirmed" ? "ต้องจัดช่าง" : "ตรวจสอบการโอน"}
+                      {addOnPending(j) ? "ตีราคางานเพิ่มหน้างาน" : j.status === "requested" ? "ต้องตีราคา" : j.status === "confirmed" ? "ต้องจัดช่าง" : "ตรวจสอบการโอน"}
                     </span>
                   </span>
                   <StatusBadge status={j.status} />

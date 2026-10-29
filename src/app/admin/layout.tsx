@@ -8,6 +8,7 @@ const NAV = [
   ["/admin/jobs", "📋 งานทั้งหมด"],
   ["/admin/staff", "👷 พนักงาน / Supplier"],
   ["/admin/timesheet", "⏱️ ชั่วโมงทำงาน"],
+  ["/admin/payouts", "💸 จ่ายค่าแรง"],
   ["/admin/pricing", "💰 บริการและราคา"],
   ["/admin/settings", "⚙️ ตั้งค่า"],
 ] as const;

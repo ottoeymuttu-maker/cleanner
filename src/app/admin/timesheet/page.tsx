@@ -1,18 +1,16 @@
 import Link from "next/link";
-import { listJobs, listUsers } from "@/lib/db";
-import { bkkMonth, monthRange, payrollRow } from "@/lib/payroll";
+import { listJobs, listServices, listUsers } from "@/lib/db";
+import { PAY_MODEL_LABEL, bkkMonth, monthRange, payrollRow } from "@/lib/payroll";
 import { baht } from "@/lib/pricing";
 import { fmtDateTime } from "@/lib/status";
 import { sessionsFor } from "@/lib/timesheet";
-
-const PAY = { hourly: "รายชั่วโมง", per_job: "ต่องาน", commission: "คอมมิชชั่น" } as const;
 
 export default async function Timesheet(props: PageProps<"/admin/timesheet">) {
   const sp = await props.searchParams;
   const month = typeof sp.month === "string" && /^\d{4}-\d{2}$/.test(sp.month) ? sp.month : bkkMonth(new Date().toISOString());
   const focus = typeof sp.staff === "string" ? sp.staff : undefined;
-  const [staff, jobs] = await Promise.all([listUsers("staff"), listJobs()]);
-  const rows = staff.map((s) => payrollRow(s, jobs, month));
+  const [staff, jobs, services] = await Promise.all([listUsers("staff"), listJobs(), listServices()]);
+  const rows = staff.map((s) => payrollRow(s, jobs, services, month));
   const { from, to } = monthRange(month);
   const focusUser = staff.find((s) => s.id === focus);
 
@@ -36,14 +34,14 @@ export default async function Timesheet(props: PageProps<"/admin/timesheet">) {
               <th className="th text-right">งานเสร็จ</th>
               <th className="th text-right">ชั่วโมง</th>
               <th className="th text-right">มูลค่างาน</th>
-              <th className="th text-right">ค่าตอบแทน (ประมาณ)</th>
+              <th className="th text-right">ค่าแรงตามงาน</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.staff.id} className={focus === r.staff.id ? "bg-brand-50" : "hover:bg-slate-50"}>
                 <td className="td"><Link href={`?month=${month}&staff=${r.staff.id}`} className="text-brand-700 underline">{r.staff.name}</Link></td>
-                <td className="td">{PAY[r.staff.staff!.payModel]} ({r.staff.staff!.rate})</td>
+                <td className="td">{PAY_MODEL_LABEL[r.staff.staff!.payModel]}{r.staff.staff!.payModel !== "per_service" && ` (${r.staff.staff!.rate})`}</td>
                 <td className="td text-right">{r.jobs}</td>
                 <td className="td text-right">{r.hours.toFixed(2)}</td>
                 <td className="td text-right">{baht(r.jobValue)}</td>

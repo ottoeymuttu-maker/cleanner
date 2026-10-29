@@ -1,14 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { adminSaveQuote } from "@/app/actions";
 import { baht } from "@/lib/pricing";
 import type { Job, JobItem, Service } from "@/lib/types";
 
-export function QuoteEditor({ job, services, canResend }: { job: Job; services: Service[]; canResend: boolean }) {
-  const [items, setItems] = useState<JobItem[]>(job.items);
-  const [travel, setTravel] = useState(job.travelFee);
-  const [discount, setDiscount] = useState(job.discount);
+type Props = {
+  services: Service[];
+  submitLabel: string;
+  action: (formData: FormData) => void | Promise<void>;
+  /** ใบเสนอราคาหลักมีค่าเดินทาง/ส่วนลด งานเพิ่มไม่มี */
+  fees?: Pick<Job, "travelFee" | "discount">;
+  initialItems: JobItem[];
+};
+
+export function QuoteEditor({ services, submitLabel, action, fees, initialItems }: Props) {
+  const [items, setItems] = useState<JobItem[]>(initialItems);
+  const [travel, setTravel] = useState(fees?.travelFee ?? 0);
+  const [discount, setDiscount] = useState(fees?.discount ?? 0);
   const subtotal = items.reduce((s, i) => s + i.qty * i.unitPrice, 0);
   const set = (idx: number, patch: Partial<JobItem>) => setItems((xs) => xs.map((x, i) => (i === idx ? { ...x, ...patch } : x)));
 
@@ -18,7 +26,7 @@ export function QuoteEditor({ job, services, canResend }: { job: Job; services: 
   };
 
   return (
-    <form action={adminSaveQuote.bind(null, job.id)} className="space-y-3">
+    <form action={action} className="space-y-3">
       <table className="w-full text-sm">
         <thead>
           <tr>
@@ -54,14 +62,16 @@ export function QuoteEditor({ job, services, canResend }: { job: Job; services: 
         </button>
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {fees && (<>
         <div><label className="label">ค่าเดินทาง</label><input name="travelFee" type="number" value={travel} onChange={(e) => setTravel(+e.target.value)} className="input" /></div>
         <div><label className="label">ส่วนลด</label><input name="discount" type="number" value={discount} onChange={(e) => setDiscount(+e.target.value)} className="input" /></div>
-        <div className="col-span-2 self-end text-right">
+        </>)}
+        <div className={`self-end text-right ${fees ? "col-span-2" : "col-span-4"}`}>
           <div className="text-xs text-slate-500">ยอดสุทธิ</div>
           <div className="text-xl font-bold">{baht(Math.max(0, subtotal + travel - discount))}</div>
         </div>
       </div>
-      <button className="btn-primary">{canResend ? "💾 บันทึกและส่งใบเสนอราคาให้ลูกค้า" : "💾 บันทึกการแก้ไขราคา"}</button>
+      <button className="btn-primary">{submitLabel}</button>
     </form>
   );
 }

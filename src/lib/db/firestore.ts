@@ -6,10 +6,11 @@
 //   services/{id}
 //   users/{id}           ลูกค้า / พนักงาน / แอดมิน (staff profile ฝังใน field staff)
 //   jobs/{id}            timeline, photos, checkIns ฝังใน document เดียวกัน
+//   payouts/{id}         รายการจ่ายค่าแรงช่าง/แม่บ้าน (config/counters.payoutSeq รันเลข PAY-xxxx)
 
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
 import { firebaseApp } from "../firebase";
-import type { Job, Service, Settings, User } from "../types";
+import type { Job, Payout, Service, Settings, User } from "../types";
 import type { Backend } from "./backend";
 import { seedData } from "./seed";
 
@@ -107,5 +108,55 @@ export const firestoreBackend: Backend = {
   },
   async updateSettings(patch) {
     await (await ensureSeed()).doc("config/settings").set(patch, { merge: true });
+  },
+
+  async listPayouts() {
+    const fs = await ensureSeed();
+    return (await fs.collection("payouts").get()).docs.map((d) => d.data() as Payout);
+  },
+  async getPayout(id) {
+    const fs = await ensureSeed();
+    return (await fs.doc(`payouts/${id}`).get()).data() as Payout | undefined;
+  },
+
+  async createPayout(input) {
+    const fs = await ensureSeed();
+    return fs.runTransaction(async (tx) => {
+      const counterRef = fs.doc("config/counters");
+      const jobRefs = input.lines.map((l) => fs.doc(`jobs/${l.jobId}`));
+      const [counter, ...jobSnaps] = await Promise.all([tx.get(counterRef), ...jobRefs.map((r) => tx.get(r))]);
+      const jobs = jobSnaps.map((s) => s.data() as Job | undefined);
+      if (jobs.some((j) => !j || j.payouts?.[input.staffId])) throw new Error("มีงานที่ทำรายการจ่ายไปแล้ว");
+
+      const seq = (counter.data()?.payoutSeq ?? 0) + 1;
+      const payout: Payout = { ...input, id: "p" + seq, code: "PAY-" + String(seq).padStart(4, "0") };
+      tx.set(counterRef, { payoutSeq: seq }, { merge: true });
+      tx.set(fs.doc(`payouts/${payout.id}`), payout);
+      jobRefs.forEach((ref) => tx.set(ref, { payouts: { [input.staffId]: payout.id } }, { merge: true }));
+      return payout;
+    });
+  },
+
+  async updatePayout(id, patch) {
+    const fs = await ensureSeed();
+    return fs.runTransaction(async (tx) => {
+      const ref = fs.doc(`payouts/${id}`);
+      const payout = (await tx.get(ref)).data() as Payout | undefined;
+      if (!payout) throw new Error("ไม่พบรายการจ่าย " + id);
+      if (patch.status === "void") {
+        const jobRefs = payout.lines.map((l) => fs.doc(`jobs/${l.jobId}`));
+        const snaps = await Promise.all(jobRefs.map((r) => tx.get(r)));
+        snaps.forEach((s, i) => {
+          const job = s.data() as Job | undefined;
+          if (job?.payouts?.[payout.staffId] === id) {
+            delete job.payouts[payout.staffId];
+            tx.set(jobRefs[i], job);
+          }
+        });
+      }
+      const next = { ...payout, ...patch };
+      tx.set(ref, next);
+      return next;
+    });
   },
 };

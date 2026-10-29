@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { staffOnTheWay, staffUploadPhoto } from "@/app/actions";
 import { PageHeader, Photos, StatusBadge } from "@/components/ui";
-import { getJob, getUser } from "@/lib/db";
+import { AddOnList, AddOnRequestForm } from "@/components/addons";
+import { getJob, getUser, listServices } from "@/lib/db";
 import { requireRole } from "@/lib/session";
 import { fmtDateTime } from "@/lib/status";
 import { GeoButton } from "./geo-button";
@@ -11,7 +12,8 @@ export default async function StaffJob(props: PageProps<"/staff/jobs/[id]">) {
   const { id } = await props.params;
   const job = await getJob(id);
   if (!job || !job.staffIds.includes(user.id)) notFound();
-  const customer = await getUser(job.customerId);
+  const [customer, services] = await Promise.all([getUser(job.customerId), listServices()]);
+  const addOnOpen = (job.addOns ?? []).some((a) => ["requested", "quoted"].includes(a.status));
   const checkedIn = job.checkIns.some((c) => c.staffId === user.id && !c.outAt);
   const hasBefore = job.photos.some((p) => p.kind === "before");
   const hasAfter = job.photos.some((p) => p.kind === "after");
@@ -58,13 +60,21 @@ export default async function StaffJob(props: PageProps<"/staff/jobs/[id]">) {
               <Step n={2} title="ถ่ายรูปหลังทำงาน" done={hasAfter} locked={!hasBefore}>
                 <PhotoForm jobId={job.id} kind="after" done={hasAfter} />
               </Step>
-              <Step n={3} title="ปิดงาน" done={false} locked={!hasAfter}>
+              <Step n={3} title={addOnOpen ? "ปิดงาน (รอยืนยันงานเพิ่ม)" : "ปิดงาน"} done={false} locked={!hasAfter || addOnOpen}>
                 <GeoButton jobId={job.id} mode="complete" label="✅ ปิดงาน + เช็คเอาท์" />
               </Step>
             </ol>
           )}
           {["completed", "closed"].includes(job.status) && <p className="text-sm text-emerald-700">งานนี้ปิดแล้ว ขอบคุณครับ 🙏</p>}
         </section>
+
+        {["assigned", "on_the_way", "in_progress"].includes(job.status) && (
+          <section className="card space-y-3">
+            <h2 className="text-sm font-semibold">งานเพิ่ม / ขยายเวลา</h2>
+            <AddOnList job={job} />
+            <AddOnRequestForm job={job} services={services.filter((s) => s.active)} />
+          </section>
+        )}
 
         <section className="card">
           <h2 className="mb-2 text-sm font-semibold">รูปงาน</h2>

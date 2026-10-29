@@ -1,11 +1,18 @@
 import { notFound } from "next/navigation";
-import { adminAssign, adminRecordPayment, adminSetStatus } from "@/app/actions";
+import { adminAssign, adminQuoteAddOn, adminRecordPayment, adminRejectAddOn, adminSaveQuote, adminSetStatus } from "@/app/actions";
 import { Photos, Stars, StatusBadge } from "@/components/ui";
 import { getJob, listJobs, listServices, listUsers } from "@/lib/db";
 import { baht, jobTotals } from "@/lib/pricing";
 import { STATUS_LABEL, TZ, fmtDateTime } from "@/lib/status";
 import type { ServiceCategory } from "@/lib/types";
 import { QuoteEditor } from "./quote-editor";
+
+const ADDON_STATUS = {
+  requested: ["รอแอดมินตีราคา", "bg-amber-100 text-amber-800"],
+  quoted: ["รอลูกค้ายืนยัน", "bg-orange-100 text-orange-800"],
+  accepted: ["ลูกค้ายืนยันแล้ว", "bg-emerald-100 text-emerald-800"],
+  rejected: ["ไม่รับ / ยกเลิก", "bg-slate-200 text-slate-500"],
+} as const;
 
 const toLocalInput = (iso: string) =>
   new Date(iso).toLocaleString("sv-SE", { timeZone: TZ }).slice(0, 16).replace(" ", "T");
@@ -48,7 +55,57 @@ export default async function AdminJob(props: PageProps<"/admin/jobs/[id]">) {
 
           <section className="card">
             <h2 className="mb-3 font-semibold">ใบเสนอราคา {job.needsSurvey && <span className="text-xs font-normal text-amber-600">(ลูกค้าขอให้ประเมิน)</span>}</h2>
-            <QuoteEditor job={job} services={services.filter((s) => s.active)} canResend={["requested", "quoted"].includes(job.status)} />
+            <QuoteEditor
+              services={services.filter((s) => s.active)}
+              initialItems={job.items}
+              fees={{ travelFee: job.travelFee, discount: job.discount }}
+              action={adminSaveQuote.bind(null, job.id)}
+              submitLabel={["requested", "quoted"].includes(job.status) ? "💾 บันทึกและส่งใบเสนอราคาให้ลูกค้า" : "💾 บันทึกการแก้ไขราคา"}
+            />
+          </section>
+
+          <section className="card">
+            <h2 className="mb-3 font-semibold">งานเพิ่ม / ขยายเวลาหน้างาน</h2>
+            {(job.addOns ?? []).length === 0 && <p className="mb-3 text-sm text-slate-400">ยังไม่มีคำขอ</p>}
+            <div className="space-y-4">
+              {(job.addOns ?? []).map((a) => (
+                <div key={a.id} className="rounded-xl p-3 ring-1 ring-slate-200">
+                  <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs ${ADDON_STATUS[a.status][1]}`}>{ADDON_STATUS[a.status][0]}</span>
+                    <span>ขอโดย {name(a.requestedBy)} · {fmtDateTime(a.requestedAt)}</span>
+                  </div>
+                  {a.reason && <p className="mb-2 text-sm text-slate-600">“{a.reason}”</p>}
+                  {["requested", "quoted"].includes(a.status) ? (
+                    <>
+                      <QuoteEditor
+                        services={services.filter((s) => s.active)}
+                        initialItems={a.items}
+                        action={adminQuoteAddOn.bind(null, job.id, a.id)}
+                        submitLabel={a.status === "quoted" ? "ส่งใบเสนอราคางานเพิ่มอีกครั้ง" : "📨 ส่งใบเสนอราคางานเพิ่มให้ลูกค้ายืนยัน"}
+                      />
+                      <form action={adminRejectAddOn.bind(null, job.id, a.id)} className="mt-2">
+                        <button className="btn-danger py-1.5">ปฏิเสธคำขอ</button>
+                      </form>
+                    </>
+                  ) : (
+                    <ul className="text-sm">{a.items.map((i, k) => <li key={k}>{i.name} × {i.qty} = {baht(i.qty * i.unitPrice)}</li>)}</ul>
+                  )}
+                </div>
+              ))}
+            </div>
+            {!["closed", "cancelled", "requested", "quoted"].includes(job.status) && (
+              <details className="mt-3">
+                <summary className="cursor-pointer text-sm font-medium text-brand-700">+ สร้างงานเพิ่มเอง (ลูกค้าโทรแจ้ง)</summary>
+                <div className="mt-2">
+                  <QuoteEditor
+                    services={services.filter((s) => s.active)}
+                    initialItems={[]}
+                    action={adminQuoteAddOn.bind(null, job.id, "new")}
+                    submitLabel="📨 ส่งใบเสนอราคางานเพิ่มให้ลูกค้ายืนยัน"
+                  />
+                </div>
+              </details>
+            )}
           </section>
 
           <section className="card">
@@ -105,14 +162,14 @@ export default async function AdminJob(props: PageProps<"/admin/jobs/[id]">) {
             ) : (
               <p className="text-slate-400">ยังไม่ชำระ (ยอด {baht(total)})</p>
             )}
-            {!job.payment?.verified && (
+            {(!job.payment?.verified || job.payment.amount < total) && (
               <form action={adminRecordPayment.bind(null, job.id)} className="flex flex-wrap gap-2">
                 <select name="method" defaultValue={job.payment?.method ?? "promptpay"} className="input w-auto">
                   <option value="promptpay">PromptPay</option>
                   <option value="cash">เงินสด</option>
                   <option value="card">บัตร</option>
                 </select>
-                <input name="amount" type="number" defaultValue={job.payment?.amount ?? total} className="input w-28" />
+                <input name="amount" type="number" defaultValue={total} className="input w-28" />
                 <button className="btn-primary">ยืนยันรับเงิน</button>
               </form>
             )}

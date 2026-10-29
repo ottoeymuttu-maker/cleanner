@@ -2,7 +2,7 @@
 
 import { promises as fs } from "fs";
 import path from "path";
-import type { DbShape } from "../types";
+import type { DbShape, Payout } from "../types";
 import type { Backend } from "./backend";
 import { seedData } from "./seed";
 
@@ -79,5 +79,30 @@ export const jsonBackend: Backend = {
   updateSettings: (patch) =>
     mutate((db) => {
       db.settings = { ...db.settings, ...patch };
+    }),
+
+  listPayouts: async () => (await load()).payouts ?? [],
+  getPayout: async (id) => (await load()).payouts?.find((p) => p.id === id),
+
+  createPayout: (input) =>
+    mutate((db) => {
+      db.payoutSeq = (db.payoutSeq ?? 0) + 1;
+      const payout: Payout = { ...input, id: "p" + db.payoutSeq, code: "PAY-" + String(db.payoutSeq).padStart(4, "0") };
+      const jobs = input.lines.map((l) => db.jobs.find((j) => j.id === l.jobId));
+      if (jobs.some((j) => !j || j.payouts?.[input.staffId])) throw new Error("มีงานที่ทำรายการจ่ายไปแล้ว");
+      for (const j of jobs) j!.payouts = { ...j!.payouts, [input.staffId]: payout.id };
+      (db.payouts ??= []).push(payout);
+      return payout;
+    }),
+
+  updatePayout: (id, patch) =>
+    mutate((db) => {
+      const payout = db.payouts?.find((p) => p.id === id);
+      if (!payout) throw new Error("ไม่พบรายการจ่าย " + id);
+      Object.assign(payout, patch);
+      if (patch.status === "void") {
+        for (const j of db.jobs) if (j.payouts?.[payout.staffId] === id) delete j.payouts[payout.staffId];
+      }
+      return payout;
     }),
 };

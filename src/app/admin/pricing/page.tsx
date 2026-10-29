@@ -16,7 +16,8 @@ function Row({ s }: { s?: Service }) {
         <option>ชั่วโมง</option>
         <option>ครั้ง</option>
       </select>
-      <input name="price" type="number" required defaultValue={s?.price} placeholder="ราคา" className="input col-span-2" />
+      <input name="price" type="number" required defaultValue={s?.price} placeholder="ราคาขาย" className="input col-span-1" />
+      <input name="staffPay" type="number" defaultValue={s?.staffPay} placeholder="ค่าแรง" title="ค่าแรงมาตรฐานที่จ่ายช่าง/แม่บ้าน ต่อหน่วย" className="input col-span-1" />
       <input name="durationMin" type="number" defaultValue={s?.durationMin ?? 60} title="นาที/หน่วย" className="input col-span-1" />
       <label className="col-span-1 text-center"><input type="checkbox" name="active" defaultChecked={s?.active ?? true} /></label>
       <button className={`col-span-1 ${s ? "btn-outline" : "btn-primary"} px-2`}>{s ? "บันทึก" : "เพิ่ม"}</button>
@@ -29,12 +30,12 @@ export default async function Pricing() {
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold">บริการและราคา</h1>
-      <p className="text-sm text-slate-500">ราคานี้ใช้คำนวณใบเสนอราคาอัตโนมัติเมื่อลูกค้าจองงานมาตรฐาน งานที่ส่งใบเสนอราคาไปแล้วจะไม่เปลี่ยนตาม</p>
+      <p className="text-sm text-slate-500">ราคาขายใช้คำนวณใบเสนอราคาอัตโนมัติ (งานที่ส่งใบเสนอราคาแล้วจะไม่เปลี่ยนตาม) · ค่าแรงช่าง = ราคามาตรฐานที่จ่ายช่าง/แม่บ้าน/Supplier ต่อหน่วย สำหรับคนที่ใช้รูปแบบ “ตามรายการบริการ” (ตั้งราคาเฉพาะคนได้ที่หน้าพนักงาน)</p>
       <div className="card overflow-x-auto p-0">
         <div className="min-w-[900px]">
           <div className="grid grid-cols-12 gap-2 px-3 py-2 text-xs font-semibold text-slate-500">
             <span className="col-span-2">หมวด</span><span className="col-span-4">บริการ</span><span>หน่วย</span>
-            <span className="col-span-2">ราคา (บาท)</span><span>นาที/หน่วย</span><span className="text-center">เปิดขาย</span><span />
+            <span>ราคาขาย</span><span>ค่าแรงช่าง</span><span>นาที/หน่วย</span><span className="text-center">เปิดขาย</span><span />
           </div>
           {services.map((s) => <Row key={s.id} s={s} />)}
           <Row />

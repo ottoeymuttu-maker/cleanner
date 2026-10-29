@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Stars, StatusBadge } from "@/components/ui";
-import { getUser, listJobs } from "@/lib/db";
+import { getUser, listJobs, listServices } from "@/lib/db";
 import { fmtDateTime } from "@/lib/status";
 import { StaffForm } from "../staff-form";
 
@@ -9,12 +9,13 @@ export default async function StaffProfile(props: PageProps<"/admin/staff/[id]">
   const { id } = await props.params;
   const user = await getUser(id);
   if (!user || user.role !== "staff") notFound();
-  const jobs = (await listJobs()).filter((j) => j.staffIds.includes(id));
+  const [allJobs, services] = await Promise.all([listJobs(), listServices()]);
+  const jobs = allJobs.filter((j) => j.staffIds.includes(id));
 
   return (
     <div className="max-w-4xl space-y-6">
       <h1 className="text-xl font-bold">{user.name}</h1>
-      <StaffForm user={user} />
+      <StaffForm user={user} services={services} />
       <section className="card">
         <h2 className="mb-3 font-semibold">ประวัติงาน ({jobs.length})</h2>
         <ul className="divide-y divide-slate-100 text-sm">

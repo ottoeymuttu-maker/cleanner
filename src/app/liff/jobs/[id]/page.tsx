@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 import { acceptQuote, cancelByCustomer, customerAcceptWork, reportPayment, submitReview } from "@/app/actions";
 import { PageHeader, Photos, QuoteTable, Stars, StatusBadge, Tracker } from "@/components/ui";
-import { getJob, getSettings, listUsers } from "@/lib/db";
+import { AddOnList, AddOnRequestForm } from "@/components/addons";
+import { getJob, getSettings, listServices, listUsers } from "@/lib/db";
 import { baht, jobTotals } from "@/lib/pricing";
 import { promptPayPayload } from "@/lib/promptpay";
 import { requireRole } from "@/lib/session";
@@ -14,11 +15,14 @@ export default async function JobDetail(props: PageProps<"/liff/jobs/[id]">) {
   const job = await getJob(id);
   if (!job || job.customerId !== user.id) notFound();
 
-  const [settings, staff] = await Promise.all([getSettings(), listUsers("staff")]);
+  const [settings, staff, services] = await Promise.all([getSettings(), listUsers("staff"), listServices()]);
   const { total } = jobTotals(job);
   const assigned = staff.filter((s) => job.staffIds.includes(s.id));
-  const payable = ["confirmed", "assigned", "on_the_way", "in_progress", "completed"].includes(job.status) && !job.payment;
-  const qr = payable ? await QRCode.toDataURL(promptPayPayload(settings.promptpayId, total), { width: 240, margin: 1 }) : null;
+  const paid = job.payment?.amount ?? 0;
+  const due = Math.max(0, total - paid);
+  const payable = ["confirmed", "assigned", "on_the_way", "in_progress", "completed"].includes(job.status) && due > 0;
+  const qr = payable ? await QRCode.toDataURL(promptPayPayload(settings.promptpayId, due), { width: 240, margin: 1 }) : null;
+  const canAddOn = ["assigned", "on_the_way", "in_progress"].includes(job.status);
   const cancellable = ["requested", "quoted", "confirmed", "assigned"].includes(job.status);
 
   return (
@@ -54,6 +58,14 @@ export default async function JobDetail(props: PageProps<"/liff/jobs/[id]">) {
           </section>
         )}
 
+        {((job.addOns ?? []).length > 0 || canAddOn) && (
+          <section className="card space-y-3">
+            <h2 className="text-sm font-semibold">งานเพิ่ม / ขยายเวลา</h2>
+            <AddOnList job={job} customerView />
+            {canAddOn && <AddOnRequestForm job={job} services={services.filter((s) => s.active)} />}
+          </section>
+        )}
+
         {assigned.length > 0 && (
           <section className="card">
             <h2 className="mb-2 text-sm font-semibold">ผู้ให้บริการ</h2>
@@ -85,7 +97,8 @@ export default async function JobDetail(props: PageProps<"/liff/jobs/[id]">) {
             <h2 className="text-sm font-semibold">ชำระเงินผ่าน PromptPay</h2>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={qr} alt="PromptPay QR" className="mx-auto my-2 h-56 w-56" />
-            <div className="text-lg font-bold">{baht(total)}</div>
+            <div className="text-lg font-bold">{baht(due)}</div>
+            {paid > 0 && <div className="text-xs text-slate-500">ส่วนต่างจากงานเพิ่ม (ชำระแล้ว {baht(paid)})</div>}
             <p className="text-xs text-slate-500">สแกนด้วยแอปธนาคารใดก็ได้ แล้วกดแจ้งชำระเงิน</p>
             <form action={reportPayment.bind(null, job.id)} className="mt-3 space-y-2">
               <input name="ref" placeholder="เลขอ้างอิงในสลิป (ถ้ามี)" className="input" />

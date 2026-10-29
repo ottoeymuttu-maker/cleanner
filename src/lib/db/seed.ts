@@ -19,16 +19,16 @@ export function seedData(): DbShape {
       vatRegistered: false,
     },
     services: [
-      { id: "ac-wall-normal", category: "aircon", name: "ล้างแอร์ติดผนัง 9,000–18,000 BTU (ล้างธรรมดา)", unit: "เครื่อง", price: 600, durationMin: 60, active: true },
-      { id: "ac-wall-big", category: "aircon", name: "ล้างแอร์ติดผนัง 9,000–18,000 BTU (ล้างใหญ่/ถอดล้าง)", unit: "เครื่อง", price: 1200, durationMin: 120, active: true },
-      { id: "ac-wall-xl", category: "aircon", name: "ล้างแอร์ติดผนัง 24,000 BTU ขึ้นไป", unit: "เครื่อง", price: 800, durationMin: 75, active: true },
-      { id: "ac-cassette", category: "aircon", name: "ล้างแอร์สี่ทิศทาง / ฝังฝ้า", unit: "เครื่อง", price: 1500, durationMin: 120, active: true },
-      { id: "ac-ceiling", category: "aircon", name: "ล้างแอร์แขวนใต้ฝ้า", unit: "เครื่อง", price: 1200, durationMin: 90, active: true },
-      { id: "ac-refill", category: "aircon", name: "เติมน้ำยาแอร์ R32/R410", unit: "เครื่อง", price: 900, durationMin: 30, active: true },
-      { id: "cl-hourly", category: "cleaning", name: "แม่บ้านทำความสะอาดรายชั่วโมง", unit: "ชั่วโมง", price: 250, durationMin: 60, active: true },
-      { id: "cl-condo-big", category: "cleaning", name: "Big Cleaning คอนโด ไม่เกิน 35 ตร.ม.", unit: "ครั้ง", price: 1990, durationMin: 240, active: true },
-      { id: "cl-house-big", category: "cleaning", name: "Big Cleaning บ้าน ไม่เกิน 150 ตร.ม.", unit: "ครั้ง", price: 4500, durationMin: 480, active: true },
-      { id: "cl-sofa", category: "cleaning", name: "ซักโซฟา (ต่อที่นั่ง)", unit: "ครั้ง", price: 350, durationMin: 30, active: true },
+      { id: "ac-wall-normal", category: "aircon", name: "ล้างแอร์ติดผนัง 9,000–18,000 BTU (ล้างธรรมดา)", unit: "เครื่อง", price: 600, durationMin: 60, staffPay: 300, active: true },
+      { id: "ac-wall-big", category: "aircon", name: "ล้างแอร์ติดผนัง 9,000–18,000 BTU (ล้างใหญ่/ถอดล้าง)", unit: "เครื่อง", price: 1200, durationMin: 120, staffPay: 600, active: true },
+      { id: "ac-wall-xl", category: "aircon", name: "ล้างแอร์ติดผนัง 24,000 BTU ขึ้นไป", unit: "เครื่อง", price: 800, durationMin: 75, staffPay: 400, active: true },
+      { id: "ac-cassette", category: "aircon", name: "ล้างแอร์สี่ทิศทาง / ฝังฝ้า", unit: "เครื่อง", price: 1500, durationMin: 120, staffPay: 700, active: true },
+      { id: "ac-ceiling", category: "aircon", name: "ล้างแอร์แขวนใต้ฝ้า", unit: "เครื่อง", price: 1200, durationMin: 90, staffPay: 550, active: true },
+      { id: "ac-refill", category: "aircon", name: "เติมน้ำยาแอร์ R32/R410", unit: "เครื่อง", price: 900, durationMin: 30, staffPay: 400, active: true },
+      { id: "cl-hourly", category: "cleaning", name: "แม่บ้านทำความสะอาดรายชั่วโมง", unit: "ชั่วโมง", price: 250, durationMin: 60, staffPay: 120, active: true },
+      { id: "cl-condo-big", category: "cleaning", name: "Big Cleaning คอนโด ไม่เกิน 35 ตร.ม.", unit: "ครั้ง", price: 1990, durationMin: 240, staffPay: 900, active: true },
+      { id: "cl-house-big", category: "cleaning", name: "Big Cleaning บ้าน ไม่เกิน 150 ตร.ม.", unit: "ครั้ง", price: 4500, durationMin: 480, staffPay: 2000, active: true },
+      { id: "cl-sofa", category: "cleaning", name: "ซักโซฟา (ต่อที่นั่ง)", unit: "ครั้ง", price: 350, durationMin: 30, staffPay: 150, active: true },
     ],
     users: [
       { id: "admin1", role: "admin", name: "แอดมิน", phone: "020000000" },
@@ -40,7 +40,7 @@ export function seedData(): DbShape {
       },
       {
         id: "s2", role: "staff", name: "ช่างบอย (ทีมแอร์)", phone: "0811110002",
-        staff: { type: "supplier", company: "บอยแอร์เซอร์วิส", skills: ["aircon"], zone: "ลาดพร้าว / บางกะปิ", payModel: "commission", rate: 60, joinedAt: "2025-06-15", active: true },
+        staff: { type: "supplier", company: "บอยแอร์เซอร์วิส", skills: ["aircon"], zone: "ลาดพร้าว / บางกะปิ", payModel: "per_service", rate: 0, serviceRates: { "ac-wall-normal": 320 }, withholdingTax: true, bankName: "กสิกรไทย", bankAccount: "123-4-56789-0", joinedAt: "2025-06-15", active: true },
       },
       {
         id: "s3", role: "staff", name: "พี่นิด (แม่บ้าน)", phone: "0811110003",
@@ -48,7 +48,7 @@ export function seedData(): DbShape {
       },
       {
         id: "s4", role: "staff", name: "พี่แดง (แม่บ้าน)", phone: "0811110004",
-        staff: { type: "supplier", company: "", skills: ["cleaning"], zone: "กรุงเทพฯ เหนือ", payModel: "per_job", rate: 500, joinedAt: "2025-01-10", active: true },
+        staff: { type: "supplier", company: "", skills: ["cleaning"], zone: "กรุงเทพฯ เหนือ", payModel: "per_job", rate: 500, withholdingTax: true, joinedAt: "2025-01-10", active: true },
       },
     ],
     jobs: [
