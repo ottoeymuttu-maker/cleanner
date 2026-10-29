@@ -11,6 +11,7 @@ type State =
   | { kind: "error"; message: string };
 
 const RETRY_KEY = "liff-relogin";
+const STATE_KEY = "liff-login-target";
 
 /** เปิดจาก LINE จะ login อัตโนมัติ เปิดจากเบราว์เซอร์ทั่วไปจะพาไปหน้า login ของ LINE */
 export function LiffLogin({ liffId, role, next }: { liffId: string; role: Role; next: string }) {
@@ -18,24 +19,32 @@ export function LiffLogin({ liffId, role, next }: { liffId: string; role: Role; 
 
   useEffect(() => {
     (async () => {
+      // LINE ตรวจที่อยู่กลับหลัง login แบบตรงตัว จึงใช้ path ล้วน (ไม่มี ?query) แล้วจำ role/next ไว้ในเบราว์เซอร์แทน
+      const saved = JSON.parse(sessionStorage.getItem(STATE_KEY) ?? "null") as { role: Role; next: string } | null;
+      const fromUrl = new URLSearchParams(location.search).has("as") || new URLSearchParams(location.search).has("next");
+      const target = fromUrl || !saved ? { role, next } : saved;
+      sessionStorage.setItem(STATE_KEY, JSON.stringify(target));
+      const redirectUri = location.origin + location.pathname;
+
       const { default: liff } = await import("@line/liff");
       await liff.init({ liffId });
       if (!liff.isLoggedIn()) {
-        liff.login({ redirectUri: location.href });
+        liff.login({ redirectUri });
         return;
       }
       const idToken = liff.getIDToken();
-      const result = idToken ? await liffLogin(idToken, role) : { ok: false as const, reason: "error" as const, message: "ไม่ได้รับ ID token" };
+      const result = idToken ? await liffLogin(idToken, target.role) : { ok: false as const, reason: "error" as const, message: "ไม่ได้รับ ID token" };
       if (result.ok) {
         sessionStorage.removeItem(RETRY_KEY);
-        location.replace(next);
+        sessionStorage.removeItem(STATE_KEY);
+        location.replace(target.next);
         return;
       }
       // token ที่เบราว์เซอร์จำไว้หมดอายุ: ออกแล้ว login ใหม่ 1 ครั้ง
       if (result.reason === "error" && !sessionStorage.getItem(RETRY_KEY)) {
         sessionStorage.setItem(RETRY_KEY, "1");
         liff.logout();
-        liff.login({ redirectUri: location.href });
+        liff.login({ redirectUri });
         return;
       }
       if (result.reason === "pending") setState({ kind: "pending" });
