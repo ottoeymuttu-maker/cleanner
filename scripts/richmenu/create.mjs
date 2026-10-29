@@ -35,7 +35,7 @@ const menu = {
   size: { width: 2500, height: 1686 },
   selected: true,
   name: NAME,
-  chatBarText: "เมนู จอง / ติดตามงาน",
+  chatBarText: "เมนูจองบริการ", // ไม่เกิน 14 ตัวอักษร
   areas: [
     area(0, 0, 833, 1000, { type: "uri", label: "จองล้างแอร์", uri: `${customer}/book?cat=aircon` }),
     area(833, 0, 834, 1000, { type: "uri", label: "จองแม่บ้าน", uri: `${customer}/book?cat=cleaning` }),
