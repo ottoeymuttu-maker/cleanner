@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // ทุกหน้าขึ้นกับผู้ใช้ที่ login จึงเรนเดอร์แบบ dynamic ทั้งหมด
+  cacheComponents: false,
   turbopack: {
     rules: {
       "*.css": {

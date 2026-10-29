@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local mock database & uploads
+/data
+!.env.example
+
+# service account keys — never commit
+/.secrets
+*-firebase-adminsdk-*.json
