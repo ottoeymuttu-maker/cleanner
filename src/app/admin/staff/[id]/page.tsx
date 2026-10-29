@@ -18,11 +18,11 @@ export default async function StaffProfile(props: PageProps<"/admin/staff/[id]">
       <StaffForm user={user} services={services} />
       <section className="card">
         <h2 className="mb-3 font-semibold">ประวัติงาน ({jobs.length})</h2>
-        <ul className="divide-y divide-slate-100 text-sm">
+        <ul className="divide-y divide-ink/10 text-sm">
           {jobs.map((j) => (
             <li key={j.id} className="flex items-center justify-between py-2">
               <Link href={`/admin/jobs/${j.id}`} className="text-brand-700 underline">{j.code}</Link>
-              <span className="text-slate-500">{fmtDateTime(j.scheduledAt)}</span>
+              <span className="text-ink/60">{fmtDateTime(j.scheduledAt)}</span>
               {j.review ? <Stars rating={j.review.rating} /> : <span className="w-16" />}
               <StatusBadge status={j.status} />
             </li>

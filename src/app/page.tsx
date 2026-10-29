@@ -15,10 +15,11 @@ export default async function Home(props: PageProps<"/">) {
     const oa = process.env.LINE_OA_BASIC_ID;
     return (
       <main className="mx-auto max-w-md px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold">{settings.shopName}</h1>
-        <p className="mt-2 text-sm text-slate-500">บริการล้างแอร์และแม่บ้าน — จองและติดตามงานผ่าน LINE</p>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-wordmark.png" alt={settings.shopName} className="mx-auto w-72" />
+        <p className="mt-6 text-lg font-bold">ล้างแอร์ · แม่บ้าน · จองผ่าน LINE ✨</p>
         {oa && (
-          <a href={`https://line.me/R/ti/p/${oa}`} className="btn-primary mt-6">
+          <a href={`https://line.me/R/ti/p/${oa}`} className="btn-primary mt-8 px-6 py-3 text-base">
             เพิ่มเพื่อน LINE {oa}
           </a>
         )}
@@ -30,7 +31,7 @@ export default async function Home(props: PageProps<"/">) {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-2xl font-bold">{settings.shopName}</h1>
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="mt-1 text-sm text-ink/60">
         โหมดทดลอง — เลือกผู้ใช้เพื่อจำลองการ login ด้วย LINE (เมื่อเชื่อม LINE จริง หน้านี้จะถูกแทนด้วย LIFF login อัตโนมัติ)
       </p>
       {need && (
@@ -49,7 +50,7 @@ export default async function Home(props: PageProps<"/">) {
         {(Object.keys(ROLE_INFO) as (keyof typeof ROLE_INFO)[]).map((role) => (
           <section key={role} className="card">
             <h2 className="font-semibold">{ROLE_INFO[role].title}</h2>
-            <p className="mb-3 text-xs text-slate-500">{ROLE_INFO[role].desc}</p>
+            <p className="mb-3 text-xs text-ink/60">{ROLE_INFO[role].desc}</p>
             <div className="space-y-2">
               {users
                 .filter((u) => u.role === role)

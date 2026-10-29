@@ -28,7 +28,7 @@ export default async function StaffList() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               {p.pictureUrl && <img src={p.pictureUrl} alt="" className="h-10 w-10 rounded-full" />}
               <div className="flex-1 text-sm">
-                <b>{p.name}</b> <span className="text-slate-500">(ชื่อใน LINE)</span>
+                <b>{p.name}</b> <span className="text-ink/60">(ชื่อใน LINE)</span>
               </div>
               <form action={adminApproveStaff.bind(null, p.id)} className="flex flex-wrap items-center gap-2">
                 <select name="linkTo" defaultValue="" className="input w-auto">
@@ -69,8 +69,8 @@ export default async function StaffList() {
               const rated = mine.filter((j) => j.review);
               const avg = rated.length ? rated.reduce((a, j) => a + j.review!.rating, 0) / rated.length : null;
               return (
-                <tr key={s.id} className={`hover:bg-slate-50 ${p.active ? "" : "opacity-50"}`}>
-                  <td className="td"><Link href={`/admin/staff/${s.id}`} className="font-semibold text-brand-700 underline">{s.name}</Link><div className="text-xs text-slate-500">{s.phone} {s.lineUserId ? "· ✅ LINE" : "· ยังไม่ผูก LINE"}</div></td>
+                <tr key={s.id} className={`hover:bg-cream ${p.active ? "" : "opacity-50"}`}>
+                  <td className="td"><Link href={`/admin/staff/${s.id}`} className="font-semibold text-brand-700 underline">{s.name}</Link><div className="text-xs text-ink/60">{s.phone} {s.lineUserId ? "· ✅ LINE" : "· ยังไม่ผูก LINE"}</div></td>
                   <td className="td">{p.type === "employee" ? "พนักงาน" : `Supplier${p.company ? ` · ${p.company}` : ""}`}</td>
                   <td className="td">{p.skills.map((k) => (k === "aircon" ? "❄️ แอร์" : "🧹 แม่บ้าน")).join(" ")}</td>
                   <td className="td">{p.zone}</td>

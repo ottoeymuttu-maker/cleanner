@@ -16,7 +16,7 @@ export default async function NewPayout(props: PageProps<"/admin/payouts/new">) 
   return (
     <div className="max-w-4xl space-y-4">
       <h1 className="text-xl font-bold">ทำรายการจ่าย — {staff.name}</h1>
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-ink/60">
         {PAY_MODEL_LABEL[staff.staff.payModel]} · บัญชี {staff.staff.bankName || "-"} {staff.staff.bankAccount || ""}
       </p>
       <form action={adminCreatePayout.bind(null, staff.id)} className="space-y-4">
@@ -31,7 +31,7 @@ export default async function NewPayout(props: PageProps<"/admin/payouts/new">) 
                   <td className="td"><input type="checkbox" name="jobIds" value={l.jobId} defaultChecked /></td>
                   <td className="td font-semibold">{l.code}</td>
                   <td className="td">{fmtDate(l.date)}</td>
-                  <td className="td text-xs text-slate-600">{l.detail}</td>
+                  <td className="td text-xs text-ink/70">{l.detail}</td>
                   <td className="td text-right">{baht(l.amount)}</td>
                 </tr>
               ))}

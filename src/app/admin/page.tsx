@@ -48,7 +48,7 @@ export default async function Dashboard() {
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {kpis.map(([label, value]) => (
           <div key={label} className="card">
-            <div className="text-xs text-slate-500">{label}</div>
+            <div className="text-xs text-ink/60">{label}</div>
             <div className="mt-1 text-xl font-bold">{value}</div>
           </div>
         ))}
@@ -57,14 +57,14 @@ export default async function Dashboard() {
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="card">
           <h2 className="mb-3 font-semibold">⚡ ต้องดำเนินการ ({needAction.length})</h2>
-          {needAction.length === 0 && <p className="text-sm text-slate-400">ไม่มี</p>}
-          <ul className="divide-y divide-slate-100 text-sm">
+          {needAction.length === 0 && <p className="text-sm text-ink/40">ไม่มี</p>}
+          <ul className="divide-y divide-ink/10 text-sm">
             {needAction.map((j) => (
               <li key={j.id}>
-                <Link href={`/admin/jobs/${j.id}`} className="flex items-center justify-between py-2 hover:bg-slate-50">
+                <Link href={`/admin/jobs/${j.id}`} className="flex items-center justify-between py-2 hover:bg-cream">
                   <span>
                     <b>{j.code}</b> · {name(j.customerId)}
-                    <span className="ml-2 text-xs text-slate-500">
+                    <span className="ml-2 text-xs text-ink/60">
                       {addOnPending(j) ? "ตีราคางานเพิ่มหน้างาน" : j.status === "requested" ? "ต้องตีราคา" : j.status === "confirmed" ? "ต้องจัดช่าง" : "ตรวจสอบการโอน"}
                     </span>
                   </span>
@@ -77,11 +77,11 @@ export default async function Dashboard() {
 
         <section className="card">
           <h2 className="mb-3 font-semibold">📅 งานวันนี้</h2>
-          {todayJobs.length === 0 && <p className="text-sm text-slate-400">ไม่มีงาน</p>}
-          <ul className="divide-y divide-slate-100 text-sm">
+          {todayJobs.length === 0 && <p className="text-sm text-ink/40">ไม่มีงาน</p>}
+          <ul className="divide-y divide-ink/10 text-sm">
             {todayJobs.map((j) => (
               <li key={j.id}>
-                <Link href={`/admin/jobs/${j.id}`} className="flex items-center justify-between py-2 hover:bg-slate-50">
+                <Link href={`/admin/jobs/${j.id}`} className="flex items-center justify-between py-2 hover:bg-cream">
                   <span>
                     {fmtDateTime(j.scheduledAt).split(" ").pop()} · <b>{j.code}</b> · {j.staffIds.map(name).join(", ") || "ยังไม่จัดช่าง"}
                   </span>
@@ -94,11 +94,11 @@ export default async function Dashboard() {
 
         <section className="card lg:col-span-2">
           <h2 className="mb-3 font-semibold">💬 รีวิวล่าสุด</h2>
-          <ul className="divide-y divide-slate-100 text-sm">
+          <ul className="divide-y divide-ink/10 text-sm">
             {reviews.slice(0, 5).map((j) => (
               <li key={j.id} className="py-2">
                 <Stars rating={j.review!.rating} /> <b>{j.code}</b> · {name(j.customerId)} → {j.staffIds.map(name).join(", ")}
-                {j.review!.comment && <div className="text-slate-600">“{j.review!.comment}”</div>}
+                {j.review!.comment && <div className="text-ink/70">“{j.review!.comment}”</div>}
               </li>
             ))}
           </ul>

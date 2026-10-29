@@ -59,34 +59,36 @@ export function LiffLogin({ liffId, role, next }: { liffId: string; role: Role; 
 
   return (
     <div className="mx-auto max-w-sm px-6 py-16 text-center">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/logo-icon.png" alt="" className="mx-auto mb-8 h-20 w-20" />
       {state.kind === "loading" && (
         <>
           <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-brand-100 border-t-brand-500" />
-          <p className="mt-4 text-sm text-slate-500">กำลังเข้าสู่ระบบด้วย LINE…</p>
+          <p className="mt-4 text-sm text-ink/60">กำลังเข้าสู่ระบบด้วย LINE…</p>
         </>
       )}
       {state.kind === "pending" && (
         <>
           <div className="text-4xl">⏳</div>
           <h1 className="mt-3 font-semibold">ส่งคำขอเข้าใช้งานแล้ว</h1>
-          <p className="mt-2 text-sm text-slate-500">รอแอดมินอนุมัติ เมื่ออนุมัติแล้วจะมีข้อความแจ้งทาง LINE จากนั้นเปิดแอปนี้อีกครั้ง</p>
+          <p className="mt-2 text-sm text-ink/60">รอแอดมินอนุมัติ เมื่ออนุมัติแล้วจะมีข้อความแจ้งทาง LINE จากนั้นเปิดแอปนี้อีกครั้ง</p>
         </>
       )}
       {state.kind === "not_admin" && (
         <>
           <div className="text-4xl">🔑</div>
           <h1 className="mt-3 font-semibold">ส่งคำขอสิทธิ์แอดมินแล้ว</h1>
-          <p className="mt-2 text-sm text-slate-500">รอแอดมินที่มีอยู่อนุมัติที่หน้า ตั้งค่า → ผู้ดูแลระบบ เมื่ออนุมัติแล้วจะมีข้อความแจ้งทาง LINE จากนั้นเปิดหน้านี้อีกครั้ง</p>
-          <p className="mt-4 text-xs text-slate-400">รหัส LINE ของคุณ</p>
-          <code className="mt-1 block break-all rounded-xl bg-slate-100 p-3 text-xs">{state.lineUserId}</code>
+          <p className="mt-2 text-sm text-ink/60">รอแอดมินที่มีอยู่อนุมัติที่หน้า ตั้งค่า → ผู้ดูแลระบบ เมื่ออนุมัติแล้วจะมีข้อความแจ้งทาง LINE จากนั้นเปิดหน้านี้อีกครั้ง</p>
+          <p className="mt-4 text-xs text-ink/40">รหัส LINE ของคุณ</p>
+          <code className="mt-1 block break-all rounded-xl bg-cream p-3 text-xs">{state.lineUserId}</code>
         </>
       )}
       {state.kind === "error" && (
         <>
           <div className="text-4xl">⚠️</div>
           <h1 className="mt-3 font-semibold">เข้าสู่ระบบไม่สำเร็จ</h1>
-          <p className="mt-2 break-words text-sm text-slate-500">{state.message}</p>
-          <p className="mt-3 break-all text-xs text-slate-400">
+          <p className="mt-2 break-words text-sm text-ink/60">{state.message}</p>
+          <p className="mt-3 break-all text-xs text-ink/40">
             LIFF {liffId} · {role} · {typeof location !== "undefined" ? location.pathname + location.search : ""}
           </p>
           <button className="btn-primary mt-4" onClick={() => location.reload()}>ลองอีกครั้ง</button>

@@ -20,6 +20,7 @@ export default async function StaffHome() {
   return (
     <>
       <PageHeader
+        logo
         title={`งานของ ${user.name}`}
         right={
           <form action={logout}>
@@ -29,13 +30,13 @@ export default async function StaffHome() {
       />
       <div className="space-y-4 p-4">
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="card p-3"><div className="text-xl font-bold">{open.length}</div><div className="text-xs text-slate-500">งานรอทำ</div></div>
-          <div className="card p-3"><div className="text-xl font-bold">{done.length}</div><div className="text-xs text-slate-500">งานเสร็จ</div></div>
-          <div className="card p-3"><div className="text-xl font-bold">{hours.toFixed(1)}</div><div className="text-xs text-slate-500">ชม. เดือนนี้</div></div>
+          <div className="card p-3"><div className="text-2xl font-black">{open.length}</div><div className="text-xs text-ink/60">งานรอทำ</div></div>
+          <div className="card p-3"><div className="text-2xl font-black">{done.length}</div><div className="text-xs text-ink/60">งานเสร็จ</div></div>
+          <div className="card p-3"><div className="text-2xl font-black">{hours.toFixed(1)}</div><div className="text-xs text-ink/60">ชม. เดือนนี้</div></div>
         </div>
 
-        <h2 className="text-sm font-semibold text-slate-700">คิวงาน</h2>
-        {open.length === 0 && <p className="text-sm text-slate-400">ยังไม่มีงานที่ได้รับมอบหมาย</p>}
+        <h2 className="text-lg font-black">คิวงาน</h2>
+        {open.length === 0 && <p className="text-sm text-ink/40">ยังไม่มีงานที่ได้รับมอบหมาย</p>}
         {open.map((j) => (
           <Link key={j.id} href={`/staff/jobs/${j.id}`} className="card block">
             <div className="flex items-center justify-between">
@@ -43,13 +44,13 @@ export default async function StaffHome() {
               <StatusBadge status={j.status} />
             </div>
             <div className="mt-1 text-sm">{j.items.map((i) => `${i.name} ×${i.qty}`).join(", ")}</div>
-            <div className="mt-1 text-xs text-slate-500">📍 {j.address}</div>
+            <div className="mt-1 text-xs text-ink/60">📍 {j.address}</div>
           </Link>
         ))}
 
         {done.length > 0 && (
           <>
-            <h2 className="pt-2 text-sm font-semibold text-slate-700">งานที่เสร็จแล้ว</h2>
+            <h2 className="pt-2 text-lg font-black">งานที่เสร็จแล้ว</h2>
             {done.map((j) => (
               <Link key={j.id} href={`/staff/jobs/${j.id}`} className="card flex items-center justify-between py-3 text-sm">
                 <span>{j.code} · {fmtDateTime(j.scheduledAt)}</span>

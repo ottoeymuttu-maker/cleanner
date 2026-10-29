@@ -39,15 +39,15 @@ export function StaffForm({ user, services }: { user?: User; services: Service[]
       <label className="flex items-center gap-2 text-sm sm:col-span-2">
         <input type="checkbox" name="withholdingTax" defaultChecked={p?.withholdingTax ?? p?.type === "supplier"} /> หัก ณ ที่จ่าย 3% เมื่อจ่ายค่าแรง (ผู้รับจ้างภายนอก)
       </label>
-      <details className="rounded-xl bg-slate-50 p-3 sm:col-span-2" open={p?.payModel === "per_service"}>
+      <details className="rounded-xl bg-cream p-3 sm:col-span-2" open={p?.payModel === "per_service"}>
         <summary className="cursor-pointer text-sm font-semibold">ค่าแรงต่อหน่วยบริการ (เฉพาะคนนี้) — เว้นว่าง = ใช้ราคามาตรฐาน</summary>
         <table className="mt-2 w-full text-sm">
           <thead><tr><th className="th">บริการ</th><th className="th w-28 text-right">มาตรฐาน</th><th className="th w-36">ราคาเฉพาะคนนี้</th></tr></thead>
           <tbody>
             {services.map((s) => (
               <tr key={s.id}>
-                <td className="td">{s.name} <span className="text-xs text-slate-400">/{s.unit}</span></td>
-                <td className="td text-right text-slate-500">{s.staffPay ?? "-"}</td>
+                <td className="td">{s.name} <span className="text-xs text-ink/40">/{s.unit}</span></td>
+                <td className="td text-right text-ink/60">{s.staffPay ?? "-"}</td>
                 <td className="td"><input name={"rate_" + s.id} type="number" step="0.01" defaultValue={p?.serviceRates?.[s.id]} className="input" /></td>
               </tr>
             ))}

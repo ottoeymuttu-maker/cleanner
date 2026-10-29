@@ -13,15 +13,15 @@ export const STATUS_LABEL: Record<JobStatus, string> = {
 };
 
 export const STATUS_COLOR: Record<JobStatus, string> = {
-  requested: "bg-amber-100 text-amber-800",
-  quoted: "bg-orange-100 text-orange-800",
-  confirmed: "bg-sky-100 text-sky-800",
-  assigned: "bg-indigo-100 text-indigo-800",
-  on_the_way: "bg-violet-100 text-violet-800",
-  in_progress: "bg-blue-100 text-blue-800",
-  completed: "bg-teal-100 text-teal-800",
-  closed: "bg-emerald-100 text-emerald-800",
-  cancelled: "bg-slate-200 text-slate-600",
+  requested: "bg-amber-200",
+  quoted: "bg-pink",
+  confirmed: "bg-lilac",
+  assigned: "bg-sky-200",
+  on_the_way: "bg-violet-300",
+  in_progress: "bg-cyan-200",
+  completed: "bg-orange-200",
+  closed: "bg-brand-500",
+  cancelled: "bg-neutral-200 text-ink/50",
 };
 
 /** ลำดับขั้นที่ลูกค้าเห็นในหน้า tracking */

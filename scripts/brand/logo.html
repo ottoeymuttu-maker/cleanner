@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<!-- โลโก้ Cleanner: ?v=icon (1024x1024) หรือ ?v=wordmark (2000x700) — เรนเดอร์ด้วย headless Chrome -->
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@900&display=block" rel="stylesheet">
+<style>
+  * { margin: 0; box-sizing: border-box; }
+  html, body { background: transparent; }
+  body { font-family: "Kanit", sans-serif; }
+  .icon {
+    position: relative; width: 1024px; height: 1024px;
+  }
+  .badge {
+    position: absolute; left: 60px; top: 60px; width: 860px; height: 860px;
+    background: #c8f54a; border: 34px solid #111; border-radius: 230px;
+    box-shadow: 44px 44px 0 #111;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  /* ตัว C หนาพิเศษ + น้ำแข็ง/ประกายความสะอาด */
+  .c { font-size: 820px; font-weight: 900; line-height: 1; color: #111; transform: translate(-30px, 30px); letter-spacing: -20px; }
+  .spark { position: absolute; }
+  .s1 { right: 105px; top: 120px; width: 210px; transform: rotate(10deg); }
+  .s2 { right: 230px; top: 330px; width: 105px; transform: rotate(-12deg); }
+  .drop { position: absolute; right: 120px; bottom: 120px; width: 170px; }
+
+  .wordmark { display: flex; align-items: center; gap: 70px; width: 2000px; height: 700px; padding: 0 80px; }
+  .wordmark img { width: 500px; height: 500px; flex: none; }
+  .wordmark .text { font-size: 250px; font-weight: 900; letter-spacing: -6px; color: #111; line-height: 1; white-space: nowrap; }
+  .wordmark .text span {
+    display: inline-block; line-height: .9; padding: 6px 30px 30px; margin-left: 10px;
+    background: #c8f54a; border: 13px solid #111; border-radius: 56px; box-shadow: 13px 13px 0 #111;
+  }
+</style>
+</head>
+<body>
+<template id="icon">
+  <div class="icon">
+    <div class="badge">
+      <div class="c">C</div>
+      <!-- ประกาย 4 แฉก -->
+      <svg class="spark s1" viewBox="0 0 100 100"><path d="M50 0 C55 35 65 45 100 50 C65 55 55 65 50 100 C45 65 35 55 0 50 C35 45 45 35 50 0Z" fill="#fff" stroke="#111" stroke-width="7" stroke-linejoin="round"/></svg>
+      <svg class="spark s2" viewBox="0 0 100 100"><path d="M50 0 C55 35 65 45 100 50 C65 55 55 65 50 100 C45 65 35 55 0 50 C35 45 45 35 50 0Z" fill="#ff8fc7" stroke="#111" stroke-width="9" stroke-linejoin="round"/></svg>
+      <!-- หยดน้ำ (ล้างแอร์/ทำความสะอาด) -->
+      <svg class="drop" viewBox="0 0 100 130"><path d="M50 4 C70 40 94 62 94 86 A44 44 0 0 1 6 86 C6 62 30 40 50 4Z" fill="#7dd3fc" stroke="#111" stroke-width="8" stroke-linejoin="round"/><ellipse cx="34" cy="86" rx="9" ry="15" fill="#fff"/></svg>
+    </div>
+  </div>
+</template>
+<script>
+  const v = new URLSearchParams(location.search).get("v") || "icon";
+  const icon = document.getElementById("icon").content.cloneNode(true);
+  if (v === "icon") document.body.append(icon);
+  else {
+    const w = document.createElement("div"); w.className = "wordmark";
+    // ใช้รูปไอคอนที่เรนเดอร์ไว้แล้ว (logo-icon.png) จะได้ขนาด layout ถูกต้อง
+    w.insertAdjacentHTML("beforeend", '<img src="logo-icon.png" alt=""><div class="text">Clean<span>ner</span></div>');
+    document.body.append(w);
+  }
+</script>
+</body>
+</html>

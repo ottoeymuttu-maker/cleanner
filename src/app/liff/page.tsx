@@ -19,42 +19,45 @@ export default async function LiffHome() {
 
   return (
     <>
-      <PageHeader title={settings.shopName} />
+      <PageHeader title={settings.shopName} logo />
       <div className="space-y-4 p-4">
-        <p className="text-sm text-slate-600">สวัสดี {user.name} 👋</p>
+        <div>
+          <p className="text-sm font-medium text-ink/60">สวัสดี 👋</p>
+          <h2 className="text-3xl font-black leading-tight">{user.name}</h2>
+        </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <Link href="/liff/book?cat=aircon" className="card text-center hover:ring-brand-500">
-            <div className="text-4xl">❄️</div>
-            <div className="mt-2 font-semibold">ล้างแอร์</div>
-            <div className="text-xs text-slate-500">เริ่ม 600 ฿/เครื่อง</div>
+        <div className="grid grid-cols-2 gap-4">
+          <Link href="/liff/book?cat=aircon" className="card relative overflow-hidden bg-sky-200 transition active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
+            <div className="absolute -right-3 -top-3 rotate-12 text-6xl">❄️</div>
+            <div className="mt-12 text-2xl font-black leading-none">ล้างแอร์</div>
+            <span className="sticker mt-3 bg-white">เริ่ม 600.-</span>
           </Link>
-          <Link href="/liff/book?cat=cleaning" className="card text-center hover:ring-brand-500">
-            <div className="text-4xl">🧹</div>
-            <div className="mt-2 font-semibold">แม่บ้าน</div>
-            <div className="text-xs text-slate-500">เริ่ม 250 ฿/ชม.</div>
+          <Link href="/liff/book?cat=cleaning" className="card relative overflow-hidden bg-lilac transition active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
+            <div className="absolute -right-3 -top-3 -rotate-12 text-6xl">🧹</div>
+            <div className="mt-12 text-2xl font-black leading-none">แม่บ้าน</div>
+            <span className="sticker mt-3 bg-white">เริ่ม 250.-/ชม.</span>
           </Link>
         </div>
 
         {dueAt && (
-          <div className="card bg-sky-50 ring-sky-200">
-            <div className="text-sm font-semibold text-sky-900">ถึงรอบล้างแอร์ {dueAt < new Date() ? "แล้ว" : "เร็ว ๆ นี้"}</div>
-            <p className="text-xs text-sky-800">ล้างครั้งล่าสุด {fmtDate(lastAircon.scheduledAt)} — แนะนำทุก 4 เดือน</p>
-            <Link href="/liff/book?cat=aircon" className="btn-primary mt-2 py-1.5">จองอีกครั้ง</Link>
+          <div className="card bg-pink">
+            <div className="text-lg font-black">⏰ ถึงรอบล้างแอร์{dueAt < new Date() ? "แล้ว!" : "เร็ว ๆ นี้"}</div>
+            <p className="text-xs font-medium">ล้างครั้งล่าสุด {fmtDate(lastAircon.scheduledAt)} — แนะนำทุก 4 เดือน</p>
+            <Link href="/liff/book?cat=aircon" className="btn-dark mt-3 py-1.5">จองอีกครั้ง →</Link>
           </div>
         )}
 
         <section>
-          <h2 className="mb-2 text-sm font-semibold text-slate-700">งานที่กำลังดำเนินการ</h2>
-          {active.length === 0 && <p className="text-sm text-slate-400">ไม่มีงานค้าง</p>}
+          <h2 className="mb-3 text-lg font-black">งานที่กำลังดำเนินการ</h2>
+          {active.length === 0 && <p className="card text-center text-sm text-ink/50">ยังไม่มีงาน กด “จองเลย!” ด้านล่างได้เลย ✨</p>}
           <div className="space-y-2">
             {active.map((j) => (
               <Link key={j.id} href={`/liff/jobs/${j.id}`} className="card block">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold">{j.code}</span>
+                  <span className="font-extrabold">{j.code}</span>
                   <StatusBadge status={j.status} />
                 </div>
-                <div className="mt-1 text-xs text-slate-500">นัด {fmtDateTime(j.scheduledAt)}</div>
+                <div className="mt-1 text-xs font-medium text-ink/60">📅 {fmtDateTime(j.scheduledAt)}</div>
               </Link>
             ))}
           </div>

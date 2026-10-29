@@ -16,14 +16,14 @@ export default async function AdminJobs(props: PageProps<"/admin/jobs">) {
     <div className="space-y-4">
       <h1 className="text-xl font-bold">งานทั้งหมด</h1>
       <div className="flex flex-wrap gap-2 text-xs">
-        <Link href="/admin/jobs" className={`rounded-full px-3 py-1 ring-1 ring-slate-300 ${!status ? "bg-slate-900 text-white" : "bg-white"}`}>
+        <Link href="/admin/jobs" className={`rounded-full px-3 py-1 ring-1 ring-ink/30 ${!status ? "bg-ink text-white" : "bg-white"}`}>
           ทั้งหมด ({jobs.length})
         </Link>
         {statuses.map((s) => {
           const n = jobs.filter((j) => j.status === s).length;
           if (!n) return null;
           return (
-            <Link key={s} href={`/admin/jobs?status=${s}`} className={`rounded-full px-3 py-1 ring-1 ring-slate-300 ${status === s ? "bg-slate-900 text-white" : "bg-white"}`}>
+            <Link key={s} href={`/admin/jobs?status=${s}`} className={`rounded-full px-3 py-1 ring-1 ring-ink/30 ${status === s ? "bg-ink text-white" : "bg-white"}`}>
               {STATUS_LABEL[s]} ({n})
             </Link>
           );
@@ -44,11 +44,11 @@ export default async function AdminJobs(props: PageProps<"/admin/jobs">) {
           </thead>
           <tbody>
             {shown.map((j) => (
-              <tr key={j.id} className="hover:bg-slate-50">
+              <tr key={j.id} className="hover:bg-cream">
                 <td className="td font-semibold"><Link href={`/admin/jobs/${j.id}`} className="text-brand-700 underline">{j.code}</Link></td>
                 <td className="td whitespace-nowrap">{fmtDateTime(j.scheduledAt)}</td>
                 <td className="td">{name(j.customerId)}</td>
-                <td className="td max-w-xs truncate">{j.items.map((i) => i.name).join(", ") || <i className="text-slate-400">รอประเมิน</i>}</td>
+                <td className="td max-w-xs truncate">{j.items.map((i) => i.name).join(", ") || <i className="text-ink/40">รอประเมิน</i>}</td>
                 <td className="td">{j.staffIds.map(name).join(", ") || "-"}</td>
                 <td className="td text-right">{j.items.length ? baht(jobTotals(j).total) : "-"}</td>
                 <td className="td"><StatusBadge status={j.status} /></td>

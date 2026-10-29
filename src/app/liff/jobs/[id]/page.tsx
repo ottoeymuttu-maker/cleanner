@@ -30,11 +30,11 @@ export default async function JobDetail(props: PageProps<"/liff/jobs/[id]">) {
       <PageHeader title={job.code} back="/liff/jobs" right={<StatusBadge status={job.status} />} />
       <div className="space-y-4 p-4">
         <section className="card text-sm">
-          <div className="text-xs text-slate-500">นัดหมาย</div>
+          <div className="text-xs text-ink/60">นัดหมาย</div>
           <div className="font-semibold">{fmtDateTime(job.scheduledAt)}</div>
-          <div className="mt-2 text-xs text-slate-500">สถานที่</div>
+          <div className="mt-2 text-xs text-ink/60">สถานที่</div>
           <div>{job.address}</div>
-          {job.note && <div className="mt-2 text-xs text-slate-500">หมายเหตุ: {job.note}</div>}
+          {job.note && <div className="mt-2 text-xs text-ink/60">หมายเหตุ: {job.note}</div>}
         </section>
 
         {job.status === "requested" && (
@@ -44,9 +44,9 @@ export default async function JobDetail(props: PageProps<"/liff/jobs/[id]">) {
         {job.items.length > 0 && (
           <section className="card">
             <div className="mb-2 flex items-baseline justify-between">
-              <h2 className="text-sm font-semibold">ใบเสนอราคา</h2>
+              <h2 className="text-base font-black">ใบเสนอราคา</h2>
               {job.quotation && (
-                <span className="text-xs text-slate-500">ใช้ได้ถึง {fmtDate(job.quotation.validUntil)}</span>
+                <span className="text-xs text-ink/60">ใช้ได้ถึง {fmtDate(job.quotation.validUntil)}</span>
               )}
             </div>
             <QuoteTable job={job} />
@@ -60,7 +60,7 @@ export default async function JobDetail(props: PageProps<"/liff/jobs/[id]">) {
 
         {((job.addOns ?? []).length > 0 || canAddOn) && (
           <section className="card space-y-3">
-            <h2 className="text-sm font-semibold">งานเพิ่ม / ขยายเวลา</h2>
+            <h2 className="text-base font-black">งานเพิ่ม / ขยายเวลา</h2>
             <AddOnList job={job} customerView />
             {canAddOn && <AddOnRequestForm job={job} services={services.filter((s) => s.active)} />}
           </section>
@@ -68,11 +68,11 @@ export default async function JobDetail(props: PageProps<"/liff/jobs/[id]">) {
 
         {assigned.length > 0 && (
           <section className="card">
-            <h2 className="mb-2 text-sm font-semibold">ผู้ให้บริการ</h2>
+            <h2 className="mb-2 text-base font-black">ผู้ให้บริการ</h2>
             {assigned.map((s) => (
               <div key={s.id} className="flex items-center justify-between text-sm">
                 <span>👷 {s.name}</span>
-                <a href={`tel:${s.phone}`} className="text-brand-600">📞 โทร</a>
+                <a href={`tel:${s.phone}`} className="text-brand-700">📞 โทร</a>
               </div>
             ))}
           </section>
@@ -80,26 +80,26 @@ export default async function JobDetail(props: PageProps<"/liff/jobs/[id]">) {
 
         {job.status !== "cancelled" && job.status !== "requested" && (
           <section className="card">
-            <h2 className="mb-3 text-sm font-semibold">ติดตามงาน</h2>
+            <h2 className="mb-3 text-base font-black">ติดตามงาน</h2>
             <Tracker job={job} />
           </section>
         )}
 
         {job.photos.length > 0 && (
           <section className="card">
-            <h2 className="mb-2 text-sm font-semibold">รูปก่อน / หลังทำงาน</h2>
+            <h2 className="mb-2 text-base font-black">รูปก่อน / หลังทำงาน</h2>
             <Photos job={job} />
           </section>
         )}
 
         {qr && (
           <section className="card text-center">
-            <h2 className="text-sm font-semibold">ชำระเงินผ่าน PromptPay</h2>
+            <h2 className="text-base font-black">ชำระเงินผ่าน PromptPay</h2>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={qr} alt="PromptPay QR" className="mx-auto my-2 h-56 w-56" />
             <div className="text-lg font-bold">{baht(due)}</div>
-            {paid > 0 && <div className="text-xs text-slate-500">ส่วนต่างจากงานเพิ่ม (ชำระแล้ว {baht(paid)})</div>}
-            <p className="text-xs text-slate-500">สแกนด้วยแอปธนาคารใดก็ได้ แล้วกดแจ้งชำระเงิน</p>
+            {paid > 0 && <div className="text-xs text-ink/60">ส่วนต่างจากงานเพิ่ม (ชำระแล้ว {baht(paid)})</div>}
+            <p className="text-xs text-ink/60">สแกนด้วยแอปธนาคารใดก็ได้ แล้วกดแจ้งชำระเงิน</p>
             <form action={reportPayment.bind(null, job.id)} className="mt-3 space-y-2">
               <input name="ref" placeholder="เลขอ้างอิงในสลิป (ถ้ามี)" className="input" />
               <button className="btn-primary w-full">แจ้งชำระเงินแล้ว</button>
@@ -129,11 +129,11 @@ export default async function JobDetail(props: PageProps<"/liff/jobs/[id]">) {
             <section className="card text-sm">
               <h2 className="mb-1 font-semibold">รีวิวของคุณ</h2>
               <Stars rating={job.review.rating} />
-              {job.review.comment && <p className="mt-1 text-slate-600">“{job.review.comment}”</p>}
+              {job.review.comment && <p className="mt-1 text-ink/70">“{job.review.comment}”</p>}
             </section>
           ) : (
             <form action={submitReview.bind(null, job.id)} className="card space-y-2">
-              <h2 className="text-sm font-semibold">ให้คะแนนบริการ</h2>
+              <h2 className="text-base font-black">ให้คะแนนบริการ</h2>
               <div className="flex flex-row-reverse justify-end gap-1 text-3xl [&>label:has(:checked)~label]:text-amber-400">
                 {[5, 4, 3, 2, 1].map((n) => (
                   <label key={n} className="cursor-pointer text-slate-300 has-[:checked]:text-amber-400">

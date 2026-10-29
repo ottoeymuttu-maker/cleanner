@@ -67,7 +67,7 @@ export function QuoteEditor({ services, submitLabel, action, fees, initialItems 
         <div><label className="label">ส่วนลด</label><input name="discount" type="number" value={discount} onChange={(e) => setDiscount(+e.target.value)} className="input" /></div>
         </>)}
         <div className={`self-end text-right ${fees ? "col-span-2" : "col-span-4"}`}>
-          <div className="text-xs text-slate-500">ยอดสุทธิ</div>
+          <div className="text-xs text-ink/60">ยอดสุทธิ</div>
           <div className="text-xl font-bold">{baht(Math.max(0, subtotal + travel - discount))}</div>
         </div>
       </div>

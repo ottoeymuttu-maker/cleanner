@@ -27,9 +27,9 @@ export default async function StaffJob(props: PageProps<"/staff/jobs/[id]">) {
       <div className="space-y-4 p-4">
         <section className="card space-y-1 text-sm">
           <div className="font-semibold">{fmtDateTime(job.scheduledAt)}</div>
-          <div>👤 {customer?.name} · <a className="text-brand-600" href={`tel:${customer?.phone}`}>{customer?.phone}</a></div>
+          <div>👤 {customer?.name} · <a className="text-brand-700" href={`tel:${customer?.phone}`}>{customer?.phone}</a></div>
           <div>📍 {job.address}</div>
-          <a href={mapUrl} target="_blank" className="inline-block text-brand-600">🧭 นำทางด้วย Google Maps</a>
+          <a href={mapUrl} target="_blank" className="inline-block text-brand-700">🧭 นำทางด้วย Google Maps</a>
           {job.note && <div className="rounded-lg bg-amber-50 p-2 text-amber-900">📝 {job.note}</div>}
         </section>
 
@@ -43,7 +43,7 @@ export default async function StaffJob(props: PageProps<"/staff/jobs/[id]">) {
         </section>
 
         <section className="card space-y-3">
-          <h2 className="text-sm font-semibold">ขั้นตอน</h2>
+          <h2 className="text-base font-black">ขั้นตอน</h2>
           {job.status === "assigned" && (
             <form action={staffOnTheWay.bind(null, job.id)}>
               <button className="btn-dark w-full">🚗 เริ่มเดินทาง</button>
@@ -70,14 +70,14 @@ export default async function StaffJob(props: PageProps<"/staff/jobs/[id]">) {
 
         {["assigned", "on_the_way", "in_progress"].includes(job.status) && (
           <section className="card space-y-3">
-            <h2 className="text-sm font-semibold">งานเพิ่ม / ขยายเวลา</h2>
+            <h2 className="text-base font-black">งานเพิ่ม / ขยายเวลา</h2>
             <AddOnList job={job} />
             <AddOnRequestForm job={job} services={services.filter((s) => s.active)} />
           </section>
         )}
 
         <section className="card">
-          <h2 className="mb-2 text-sm font-semibold">รูปงาน</h2>
+          <h2 className="mb-2 text-base font-black">รูปงาน</h2>
           <Photos job={job} />
         </section>
       </div>
@@ -88,7 +88,7 @@ export default async function StaffJob(props: PageProps<"/staff/jobs/[id]">) {
 function Step(props: { n: number; title: string; done: boolean; locked?: boolean; children: React.ReactNode }) {
   return (
     <li className={props.locked ? "opacity-40" : ""}>
-      <div className="mb-1 text-xs font-semibold text-slate-600">
+      <div className="mb-1 text-xs font-semibold text-ink/70">
         {props.done ? "✅" : `${props.n}.`} {props.title}
         {props.locked && " 🔒"}
       </div>

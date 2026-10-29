@@ -13,19 +13,19 @@ export default async function MyJobs() {
     <>
       <PageHeader title="งานของฉัน" />
       <div className="space-y-2 p-4">
-        {jobs.length === 0 && <p className="text-center text-sm text-slate-400">ยังไม่มีงาน</p>}
+        {jobs.length === 0 && <p className="text-center text-sm text-ink/40">ยังไม่มีงาน</p>}
         {jobs.map((j) => (
           <Link key={j.id} href={`/liff/jobs/${j.id}`} className="card block">
             <div className="flex items-center justify-between">
-              <span className="font-semibold">{j.code}</span>
+              <span className="font-extrabold">{j.code}</span>
               <StatusBadge status={j.status} />
             </div>
-            <div className="mt-1 line-clamp-1 text-sm text-slate-600">
+            <div className="mt-1 line-clamp-1 text-sm text-ink/70">
               {j.items.map((i) => i.name).join(", ") || j.note || "รอประเมิน"}
             </div>
-            <div className="mt-1 flex justify-between text-xs text-slate-500">
+            <div className="mt-1 flex justify-between text-xs text-ink/60">
               <span>นัด {fmtDateTime(j.scheduledAt)}</span>
-              {j.items.length > 0 && <span className="font-semibold text-slate-700">{baht(jobTotals(j).total)}</span>}
+              {j.items.length > 0 && <span className="font-semibold text-ink/80">{baht(jobTotals(j).total)}</span>}
             </div>
           </Link>
         ))}

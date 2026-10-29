@@ -39,7 +39,7 @@ export default async function Timesheet(props: PageProps<"/admin/timesheet">) {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.staff.id} className={focus === r.staff.id ? "bg-brand-50" : "hover:bg-slate-50"}>
+              <tr key={r.staff.id} className={focus === r.staff.id ? "bg-brand-50" : "hover:bg-cream"}>
                 <td className="td"><Link href={`?month=${month}&staff=${r.staff.id}`} className="text-brand-700 underline">{r.staff.name}</Link></td>
                 <td className="td">{PAY_MODEL_LABEL[r.staff.staff!.payModel]}{r.staff.staff!.payModel !== "per_service" && ` (${r.staff.staff!.rate})`}</td>
                 <td className="td text-right">{r.jobs}</td>

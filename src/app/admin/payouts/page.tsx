@@ -7,7 +7,7 @@ import { fmtDate } from "@/lib/status";
 const PAYOUT_STATUS = {
   pending: ["รอโอน", "bg-amber-100 text-amber-800"],
   paid: ["โอนแล้ว", "bg-emerald-100 text-emerald-800"],
-  void: ["ยกเลิก", "bg-slate-200 text-slate-500"],
+  void: ["ยกเลิก", "bg-cream text-ink/60"],
 } as const;
 
 export default async function Payouts() {
@@ -35,7 +35,7 @@ export default async function Payouts() {
           </thead>
           <tbody>
             {owed.length === 0 && (
-              <tr><td className="td text-slate-400" colSpan={5}>ไม่มียอดค้างจ่าย</td></tr>
+              <tr><td className="td text-ink/40" colSpan={5}>ไม่มียอดค้างจ่าย</td></tr>
             )}
             {owed.map(({ s, lines }) => (
               <tr key={s.id}>
@@ -65,10 +65,10 @@ export default async function Payouts() {
           </thead>
           <tbody>
             {payouts.length === 0 && (
-              <tr><td className="td text-slate-400" colSpan={6}>ยังไม่มีรายการ</td></tr>
+              <tr><td className="td text-ink/40" colSpan={6}>ยังไม่มีรายการ</td></tr>
             )}
             {payouts.map((p) => (
-              <tr key={p.id} className="hover:bg-slate-50">
+              <tr key={p.id} className="hover:bg-cream">
                 <td className="td"><Link href={`/admin/payouts/${p.id}`} className="font-semibold text-brand-700 underline">{p.code}</Link></td>
                 <td className="td">{fmtDate(p.createdAt)}</td>
                 <td className="td">{name(p.staffId)}</td>

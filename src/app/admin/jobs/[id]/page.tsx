@@ -11,14 +11,14 @@ const ADDON_STATUS = {
   requested: ["รอแอดมินตีราคา", "bg-amber-100 text-amber-800"],
   quoted: ["รอลูกค้ายืนยัน", "bg-orange-100 text-orange-800"],
   accepted: ["ลูกค้ายืนยันแล้ว", "bg-emerald-100 text-emerald-800"],
-  rejected: ["ไม่รับ / ยกเลิก", "bg-slate-200 text-slate-500"],
+  rejected: ["ไม่รับ / ยกเลิก", "bg-cream text-ink/60"],
 } as const;
 
 const toLocalInput = (iso: string) =>
   new Date(iso).toLocaleString("sv-SE", { timeZone: TZ }).slice(0, 16).replace(" ", "T");
 const bkkDay = (iso: string) => new Date(iso).toLocaleDateString("en-CA", { timeZone: TZ });
 const mapLink = (lat?: number, lng?: number) =>
-  lat ? <a className="text-brand-700 underline" target="_blank" href={`https://maps.google.com/?q=${lat},${lng}`}>แผนที่</a> : <span className="text-slate-400">ไม่มีพิกัด</span>;
+  lat ? <a className="text-brand-700 underline" target="_blank" href={`https://maps.google.com/?q=${lat},${lng}`}>แผนที่</a> : <span className="text-ink/40">ไม่มีพิกัด</span>;
 
 export default async function AdminJob(props: PageProps<"/admin/jobs/[id]">) {
   const { id } = await props.params;
@@ -41,7 +41,7 @@ export default async function AdminJob(props: PageProps<"/admin/jobs/[id]">) {
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-xl font-bold">{job.code}</h1>
         <StatusBadge status={job.status} />
-        <span className="text-sm text-slate-500">สร้างเมื่อ {fmtDateTime(job.createdAt)}</span>
+        <span className="text-sm text-ink/60">สร้างเมื่อ {fmtDateTime(job.createdAt)}</span>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-3">
@@ -66,15 +66,15 @@ export default async function AdminJob(props: PageProps<"/admin/jobs/[id]">) {
 
           <section className="card">
             <h2 className="mb-3 font-semibold">งานเพิ่ม / ขยายเวลาหน้างาน</h2>
-            {(job.addOns ?? []).length === 0 && <p className="mb-3 text-sm text-slate-400">ยังไม่มีคำขอ</p>}
+            {(job.addOns ?? []).length === 0 && <p className="mb-3 text-sm text-ink/40">ยังไม่มีคำขอ</p>}
             <div className="space-y-4">
               {(job.addOns ?? []).map((a) => (
-                <div key={a.id} className="rounded-xl p-3 ring-1 ring-slate-200">
+                <div key={a.id} className="rounded-xl p-3 ring-1 ring-ink/20">
                   <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
                     <span className={`rounded-full px-2.5 py-0.5 text-xs ${ADDON_STATUS[a.status][1]}`}>{ADDON_STATUS[a.status][0]}</span>
                     <span>ขอโดย {name(a.requestedBy)} · {fmtDateTime(a.requestedAt)}</span>
                   </div>
-                  {a.reason && <p className="mb-2 text-sm text-slate-600">“{a.reason}”</p>}
+                  {a.reason && <p className="mb-2 text-sm text-ink/70">“{a.reason}”</p>}
                   {["requested", "quoted"].includes(a.status) ? (
                     <>
                       <QuoteEditor
@@ -116,11 +116,11 @@ export default async function AdminJob(props: PageProps<"/admin/jobs/[id]">) {
                   const match = !cats.size || s.staff!.skills.some((k) => cats.has(k));
                   const load = sameDayLoad(s.id);
                   return (
-                    <label key={s.id} className={`flex items-start gap-2 rounded-xl p-2 text-sm ring-1 ring-slate-200 ${match ? "" : "opacity-50"}`}>
+                    <label key={s.id} className={`flex items-start gap-2 rounded-xl p-2 text-sm ring-1 ring-ink/20 ${match ? "" : "opacity-50"}`}>
                       <input type="checkbox" name="staffIds" value={s.id} defaultChecked={job.staffIds.includes(s.id)} className="mt-1" />
                       <span>
                         <b>{s.name}</b> {s.staff!.type === "supplier" && <span className="text-xs text-violet-600">Supplier</span>}
-                        <div className="text-xs text-slate-500">
+                        <div className="text-xs text-ink/60">
                           {s.staff!.zone} · วันนั้นมี {load} งาน{!match && " · ทักษะไม่ตรง"}
                         </div>
                       </span>
@@ -139,7 +139,7 @@ export default async function AdminJob(props: PageProps<"/admin/jobs/[id]">) {
           <section className="card">
             <h2 className="mb-3 font-semibold">หน้างาน</h2>
             <div className="mb-3 space-y-1 text-sm">
-              {job.checkIns.length === 0 && <p className="text-slate-400">ยังไม่มีการเช็คอิน</p>}
+              {job.checkIns.length === 0 && <p className="text-ink/40">ยังไม่มีการเช็คอิน</p>}
               {job.checkIns.map((c, i) => (
                 <div key={i}>
                   👷 {name(c.staffId)} · เข้า {fmtDateTime(c.inAt)} ({mapLink(c.inLat, c.inLng)}) · ออก{" "}
@@ -160,7 +160,7 @@ export default async function AdminJob(props: PageProps<"/admin/jobs/[id]">) {
                 <div className={job.payment.verified ? "text-emerald-600" : "text-amber-600"}>{job.payment.verified ? "✓ ยืนยันแล้ว" : "รอตรวจสอบสลิป"}</div>
               </div>
             ) : (
-              <p className="text-slate-400">ยังไม่ชำระ (ยอด {baht(total)})</p>
+              <p className="text-ink/40">ยังไม่ชำระ (ยอด {baht(total)})</p>
             )}
             {(!job.payment?.verified || job.payment.amount < total) && (
               <form action={adminRecordPayment.bind(null, job.id)} className="flex flex-wrap gap-2">
@@ -180,7 +180,7 @@ export default async function AdminJob(props: PageProps<"/admin/jobs/[id]">) {
             <section className="card text-sm">
               <h2 className="mb-1 font-semibold">รีวิว</h2>
               <Stars rating={job.review.rating} />
-              <p className="text-slate-600">{job.review.comment}</p>
+              <p className="text-ink/70">{job.review.comment}</p>
             </section>
           )}
 
@@ -197,11 +197,11 @@ export default async function AdminJob(props: PageProps<"/admin/jobs/[id]">) {
 
           <section className="card text-sm">
             <h2 className="mb-2 font-semibold">ประวัติ</h2>
-            <ol className="space-y-2 border-l-2 border-slate-200 pl-3">
+            <ol className="space-y-2 border-l-2 border-ink/20 pl-3">
               {[...job.timeline].reverse().map((t, i) => (
                 <li key={i}>
                   <div className="font-medium">{t.status === "note" ? t.note : STATUS_LABEL[t.status]}</div>
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-ink/60">
                     {fmtDateTime(t.at)} · {t.by === "system" ? "ระบบ" : name(t.by)}
                     {t.status !== "note" && t.note ? ` · ${t.note}` : ""}
                   </div>

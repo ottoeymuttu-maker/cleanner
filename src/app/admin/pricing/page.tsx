@@ -4,7 +4,7 @@ import type { Service } from "@/lib/types";
 
 function Row({ s }: { s?: Service }) {
   return (
-    <form action={adminSaveService} className="grid grid-cols-12 items-center gap-2 border-t border-slate-100 px-3 py-2 text-sm">
+    <form action={adminSaveService} className="grid grid-cols-12 items-center gap-2 border-t border-ink/10 px-3 py-2 text-sm">
       <input type="hidden" name="id" value={s?.id ?? ""} />
       <select name="category" defaultValue={s?.category ?? "aircon"} className="input col-span-2">
         <option value="aircon">❄️ แอร์</option>
@@ -30,10 +30,10 @@ export default async function Pricing() {
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold">บริการและราคา</h1>
-      <p className="text-sm text-slate-500">ราคาขายใช้คำนวณใบเสนอราคาอัตโนมัติ (งานที่ส่งใบเสนอราคาแล้วจะไม่เปลี่ยนตาม) · ค่าแรงช่าง = ราคามาตรฐานที่จ่ายช่าง/แม่บ้าน/Supplier ต่อหน่วย สำหรับคนที่ใช้รูปแบบ “ตามรายการบริการ” (ตั้งราคาเฉพาะคนได้ที่หน้าพนักงาน)</p>
+      <p className="text-sm text-ink/60">ราคาขายใช้คำนวณใบเสนอราคาอัตโนมัติ (งานที่ส่งใบเสนอราคาแล้วจะไม่เปลี่ยนตาม) · ค่าแรงช่าง = ราคามาตรฐานที่จ่ายช่าง/แม่บ้าน/Supplier ต่อหน่วย สำหรับคนที่ใช้รูปแบบ “ตามรายการบริการ” (ตั้งราคาเฉพาะคนได้ที่หน้าพนักงาน)</p>
       <div className="card overflow-x-auto p-0">
         <div className="min-w-[900px]">
-          <div className="grid grid-cols-12 gap-2 px-3 py-2 text-xs font-semibold text-slate-500">
+          <div className="grid grid-cols-12 gap-2 px-3 py-2 text-xs font-semibold text-ink/60">
             <span className="col-span-2">หมวด</span><span className="col-span-4">บริการ</span><span>หน่วย</span>
             <span>ราคาขาย</span><span>ค่าแรงช่าง</span><span>นาที/หน่วย</span><span className="text-center">เปิดขาย</span><span />
           </div>

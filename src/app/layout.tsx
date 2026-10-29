@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Noto_Sans_Thai } from "next/font/google";
+import { Kanit } from "next/font/google";
 import "./globals.css";
 
-const thai = Noto_Sans_Thai({
-  variable: "--font-thai",
+const kanit = Kanit({
+  variable: "--font-kanit",
   subsets: ["thai", "latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -16,12 +16,12 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#06c755",
+  themeColor: "#c8f54a",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="th" className={`${thai.variable} h-full antialiased`}>
+    <html lang="th" className={`${kanit.variable} h-full antialiased`}>
       <body className="min-h-full">{children}</body>
     </html>
   );

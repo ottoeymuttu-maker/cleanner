@@ -38,12 +38,12 @@ export default function BookingForm(props: {
 
   return (
     <form action={createBooking} onSubmit={() => setPending(true)} className="space-y-4 p-4">
-      <div className="grid grid-cols-2 gap-2 rounded-xl bg-slate-200 p-1 text-sm font-medium">
+      <div className="grid grid-cols-2 gap-2 rounded-2xl border-[3px] border-ink bg-white p-1 text-sm font-bold">
         {(["aircon", "cleaning"] as const).map((c) => (
           <Link
             key={c}
             href={`/liff/book?cat=${c}`}
-            className={`rounded-lg py-2 text-center ${props.category === c ? "bg-white shadow" : "text-slate-500"}`}
+            className={`rounded-xl py-2 text-center ${props.category === c ? (c === "aircon" ? "bg-sky-200" : "bg-lilac") + " border-2 border-ink" : "text-ink/50"}`}
           >
             {c === "aircon" ? "❄️ ล้างแอร์" : "🧹 แม่บ้าน"}
           </Link>
@@ -51,31 +51,31 @@ export default function BookingForm(props: {
       </div>
 
       <section className="card space-y-3">
-        <h2 className="text-sm font-semibold">เลือกบริการ</h2>
+        <h2 className="text-lg font-black">เลือกบริการ</h2>
         {list.map((s) => (
           <div key={s.id} className="flex items-center gap-3">
             <div className="flex-1 text-sm">
               {s.name}
-              <div className="text-xs text-slate-500">
+              <div className="text-xs text-ink/60">
                 {baht(s.price)} / {s.unit}
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => bump(s.id, -1)} className="h-8 w-8 rounded-full bg-slate-100 text-lg">−</button>
-              <span className="w-5 text-center text-sm font-semibold">{qty[s.id] ?? 0}</span>
-              <button type="button" onClick={() => bump(s.id, 1)} className="h-8 w-8 rounded-full bg-brand-500 text-lg text-white">+</button>
+              <button type="button" onClick={() => bump(s.id, -1)} className="h-9 w-9 rounded-full border-[3px] border-ink bg-white text-2xl font-black leading-none">−</button>
+              <span className="w-6 text-center text-base font-black">{qty[s.id] ?? 0}</span>
+              <button type="button" onClick={() => bump(s.id, 1)} className="h-9 w-9 rounded-full border-[3px] border-ink bg-brand-500 text-2xl font-black leading-none shadow-[2px_2px_0_#111] active:shadow-none">+</button>
               <input type="hidden" name={"qty_" + s.id} value={qty[s.id] ?? 0} />
             </div>
           </div>
         ))}
-        <label className="flex items-center gap-2 border-t border-slate-100 pt-3 text-sm">
+        <label className="flex items-center gap-2 border-t border-ink/10 pt-3 text-sm">
           <input type="checkbox" name="needsSurvey" checked={survey} onChange={(e) => setSurvey(e.target.checked)} />
           ไม่แน่ใจ / งานพิเศษ — ให้ร้านประเมินราคาก่อน
         </label>
       </section>
 
       <section className="card space-y-3">
-        <h2 className="text-sm font-semibold">วันเวลาและสถานที่</h2>
+        <h2 className="text-lg font-black">วันเวลาและสถานที่</h2>
         <div>
           <label className="label">วันและเวลาที่สะดวก</label>
           <input type="datetime-local" name="scheduledAt" required defaultValue={defaultSlot()} className="input" />
@@ -87,7 +87,7 @@ export default function BookingForm(props: {
         <div>
           <label className="label">ที่อยู่</label>
           <textarea name="address" required rows={2} defaultValue={props.defaultAddress} className="input" />
-          <button type="button" onClick={pinLocation} className="mt-2 text-xs font-medium text-brand-600">
+          <button type="button" onClick={pinLocation} className="mt-2 text-xs font-medium text-brand-700">
             📍 {loc ? `ปักหมุดแล้ว (${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)})` : "ใช้ตำแหน่งปัจจุบัน"}
           </button>
           <input type="hidden" name="lat" value={loc?.lat ?? ""} />
@@ -99,15 +99,15 @@ export default function BookingForm(props: {
         </div>
       </section>
 
-      <div className="card sticky bottom-20 flex items-center justify-between">
+      <div className="card sticky bottom-28 flex items-center justify-between">
         <div className="text-sm">
           {hasItems && !survey ? (
             <>
-              <div className="text-xs text-slate-500">ราคาประมาณ (รวมค่าเดินทาง {baht(props.travelFee)})</div>
-              <div className="text-lg font-bold">{baht(subtotal + props.travelFee)}</div>
+              <div className="text-xs text-ink/60">ราคาประมาณ (รวมค่าเดินทาง {baht(props.travelFee)})</div>
+              <div className="text-2xl font-black">{baht(subtotal + props.travelFee)}</div>
             </>
           ) : (
-            <div className="text-slate-500">ร้านจะส่งใบเสนอราคาให้ทาง LINE</div>
+            <div className="text-ink/60">ร้านจะส่งใบเสนอราคาให้ทาง LINE</div>
           )}
         </div>
         <button disabled={pending || (!hasItems && !survey)} className="btn-primary">
