@@ -2,49 +2,103 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<!-- Rich Menu 2500x1686: เรนเดอร์เป็น PNG ด้วย headless Chrome (ดู create.mjs) -->
+<!-- Rich Menu 2500x1686: เรนเดอร์เป็นรูปด้วย headless Chrome แล้วอัปโหลดด้วย create.mjs
+     โซนปุ่ม (ต้องตรงกับ areas ใน create.mjs): บน 0-1000 [จองบริการ 0-1667 | งานของฉัน 1667-2500]
+     ล่าง 1000-1686 [ติดต่อร้าน 0-1250 | ทีมงาน 1250-2500] -->
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;700;800;900&display=block" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; }
   html, body { width: 2500px; height: 1686px; overflow: hidden; }
   body {
-    font-family: "Leelawadee UI", "Noto Sans Thai", Tahoma, sans-serif;
-    background: #e9f7ef;
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: 1000px 686px;
-    gap: 14px;
-    padding: 0;
+    font-family: "Kanit", sans-serif;
+    background: #fff8ec;
+    background-image: radial-gradient(#e9dcc4 4px, transparent 4px);
+    background-size: 56px 56px;
+    position: relative;
   }
-  .cell {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 34px; color: #fff; text-align: center;
+  .card {
+    position: absolute;
+    border: 10px solid #111;
+    border-radius: 72px;
+    box-shadow: 18px 18px 0 #111;
+    overflow: hidden;
+    color: #111;
   }
-  .big { grid-column: span 2; }
-  .wide { grid-column: span 3; flex-direction: row; gap: 48px; }
-  .book { grid-column: span 4; background: linear-gradient(135deg, #0ea5e9 0%, #06c755 100%); }
-  .book .title { font-size: 190px; }
-  .book .sub { font-size: 70px; }
-  .icons { display: flex; gap: 60px; }
-  .jobs { background: linear-gradient(160deg, #f59e0b, #c2410c); }
-  .chat { background: #ffffff; color: #0f172a; }
-  .team { background: #0f172a; }
-  .icon { font-size: 260px; line-height: 1; font-family: "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
-  .wide .icon { font-size: 190px; }
-  .title { font-size: 138px; font-weight: 700; letter-spacing: 1px; }
-  .sub { font-size: 64px; opacity: .9; margin-top: -16px; }
-  .wide .title { font-size: 118px; }
-  .wide .sub { font-size: 56px; margin-top: 8px; }
-  .chat .sub { color: #475569; }
+  /* ตำแหน่งการ์ด = โซนปุ่ม ลบระยะขอบ */
+  .book { left: 40px;   top: 40px;   width: 1567px; height: 900px; background: #c8f54a; }
+  .jobs { left: 1707px; top: 40px;   width: 753px;  height: 900px; background: #c9b6ff; }
+  .chat { left: 40px;   top: 1040px; width: 1150px; height: 586px; background: #ff8fc7; }
+  .team { left: 1290px; top: 1040px; width: 1170px; height: 586px; background: #111; color: #c8f54a; }
+
+  .emoji { font-family: "Segoe UI Emoji", "Noto Color Emoji", sans-serif; line-height: 1;
+           filter: drop-shadow(0 0 0 #fff) drop-shadow(10px 10px 0 rgba(0,0,0,.18)); }
+  .title { font-weight: 900; line-height: .95; letter-spacing: -2px; }
+  .sub { font-weight: 500; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 20px;
+    background: #fff; border: 8px solid #111; border-radius: 999px;
+    padding: 14px 44px; font-size: 64px; font-weight: 700;
+    box-shadow: 8px 8px 0 #111;
+  }
+
+  /* จองบริการ */
+  .book .title { position: absolute; left: 110px; top: 120px; font-size: 250px; }
+  .book .sub   { position: absolute; left: 118px; top: 420px; font-size: 72px; }
+  .book .pills { position: absolute; left: 110px; bottom: 110px; display: flex; gap: 36px; }
+  .book .e1 { position: absolute; right: 110px; top: 80px;  font-size: 260px; transform: rotate(12deg); }
+  .book .e2 { position: absolute; right: 150px; top: 380px; font-size: 200px; transform: rotate(-14deg); }
+
+  /* งานของฉัน */
+  .jobs .emoji { position: absolute; left: 50%; top: 120px; transform: translateX(-50%) rotate(-8deg); font-size: 290px; }
+  .jobs .title { position: absolute; left: 0; right: 0; top: 480px; text-align: center; font-size: 128px; }
+  .jobs .sub   { position: absolute; left: 0; right: 0; top: 660px; text-align: center; font-size: 62px; }
+
+  /* แถวล่าง */
+  .row { position: absolute; inset: 0; display: flex; align-items: center; gap: 56px; padding: 0 90px; }
+  .row .emoji { font-size: 230px; transform: rotate(-10deg); }
+  .row .title { font-size: 150px; }
+  .row .sub   { font-size: 60px; margin-top: 14px; }
+  .team .sub  { color: #fff; opacity: .85; }
+  .tag {
+    position: absolute; top: 46px; right: 60px; transform: rotate(6deg);
+    background: #fff; color: #111; border: 7px solid #111; border-radius: 999px;
+    font-size: 50px; font-weight: 800; padding: 8px 34px;
+  }
+  .team .tag { background: #c8f54a; }
 </style>
 </head>
 <body>
-  <div class="cell book">
-    <div class="icons"><span class="icon">❄️</span><span class="icon">🧹</span></div>
-    <div class="title">จองบริการ</div>
-    <div class="sub">ล้างแอร์ เริ่ม 600 บาท · แม่บ้าน เริ่ม 250 บาท/ชม.</div>
+  <div class="card book">
+    <div class="title">จองเลย!</div>
+    <div class="sub">ล้างแอร์ · แม่บ้าน · รู้ราคาทันที</div>
+    <div class="pills">
+      <span class="pill"><span class="emoji" style="filter:none">❄️</span> ล้างแอร์ 600.-</span>
+      <span class="pill"><span class="emoji" style="filter:none">🧹</span> แม่บ้าน 250.-/ชม.</span>
+    </div>
+    <div class="emoji e1">❄️</div>
+    <div class="emoji e2">🧽</div>
   </div>
-  <div class="cell big jobs"><div class="icon">📋</div><div class="title">งานของฉัน</div><div class="sub">ติดตาม · ชำระเงิน · รีวิว</div></div>
-  <div class="cell wide chat"><div class="icon">💬</div><div><div class="title">ติดต่อร้าน</div><div class="sub">สอบถาม / แจ้งปัญหา</div></div></div>
-  <div class="cell wide team"><div class="icon">👷</div><div><div class="title">สำหรับทีมงาน</div><div class="sub">ช่างแอร์ · แม่บ้าน</div></div></div>
+
+  <div class="card jobs">
+    <div class="emoji">📋</div>
+    <div class="title">งานของฉัน</div>
+    <div class="sub">ติดตาม · จ่ายเงิน · รีวิว</div>
+  </div>
+
+  <div class="card chat">
+    <div class="tag">ตอบไว!</div>
+    <div class="row">
+      <div class="emoji">💬</div>
+      <div><div class="title">ทักร้าน</div><div class="sub">ถาม / แจ้งปัญหา</div></div>
+    </div>
+  </div>
+
+  <div class="card team">
+    <div class="tag">STAFF</div>
+    <div class="row">
+      <div class="emoji">🧑‍🔧</div>
+      <div><div class="title">ทีมงาน</div><div class="sub">ช่างแอร์ · แม่บ้าน</div></div>
+    </div>
+  </div>
 </body>
 </html>
